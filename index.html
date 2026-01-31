@@ -1,304 +1,198 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>파스텔톤 주간 플래너 7종</title>
-<style>
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: "Malgun Gothic", Arial, sans-serif;
-  color: #111;
-  background: #fff;
-}
-.page {
-  padding: 18px;
-  background: var(--bg);
-}
-.title {
-  font-weight: 700;
-  margin: 0 0 10px 2px;
-  font-size: 16px;
-  opacity: 0.7;
-}
-.planner {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  table-layout: fixed;
-  border: 1px solid var(--border);
-}
-.planner th, .planner td {
-  border: 1px solid var(--border);
-  text-align: center;
-  vertical-align: middle;
-  height: 34px;
-  padding: 6px 6px;
-  font-size: 14px;
-}
-.planner thead th {
-  background: var(--header);
-  font-weight: 700;
-}
-.planner .start { width: 80px; }
-.planner td.time {
-  background: var(--timebg);
-  font-weight: 700;
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>파스텔톤 주간 플래너</title>
+  <style>
+    :root{
+      --bg:#fff4f8;
+      --border:#f2c7d6;
+      --header:#ffe0eb;
+      --timebg:#ffedf4;
+      --text:#111;
+    }
 
-/* Print: A4 세로, 1장씩 */
-@media print {
-  @page { size: A4 portrait; margin: 12mm; }
-  .page {
-    break-after: page;
-    page-break-after: always;
-    padding: 0;
-    background: #fff; /* 프린터 호환성을 위해 배경은 흰색 */
-  }
-  .title { display:none; }
-}
-</style>
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: "Malgun Gothic", Arial, sans-serif;
+      color:var(--text);
+      background: var(--bg);
+    }
+
+    /* 상단 앱바 */
+    .appbar{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+      background: color-mix(in srgb, var(--bg) 80%, white 20%);
+      border-bottom: 1px solid var(--border);
+    }
+    .appbar-inner{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 12px 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .title{
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+    }
+
+    .theme-bar{
+      display:flex;
+      flex-wrap: wrap;
+      gap:8px;
+      justify-content:flex-end;
+    }
+    .theme-btn{
+      border: 1px solid var(--border);
+      background: white;
+      padding: 6px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      opacity: 0.9;
+      transition: transform .05s ease, opacity .15s ease;
+      user-select:none;
+    }
+    .theme-btn:hover{ opacity: 1; }
+    .theme-btn:active{ transform: scale(0.98); }
+    .theme-btn.active{
+      outline: 2px solid var(--border);
+      opacity: 1;
+    }
+
+    /* 플래너 영역 */
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 12px 30px;
+    }
+
+    .planner{
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      table-layout: fixed;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      border-radius: 10px;
+    }
+    .planner th, .planner td{
+      border: 1px solid var(--border);
+      text-align: center;
+      vertical-align: middle;
+      height: 34px;
+      padding: 6px 6px;
+      font-size: 14px;
+    }
+    .planner thead th{
+      background: var(--header);
+      font-weight: 800;
+    }
+    .planner .start{ width: 80px; }
+    .planner td.time{
+      background: var(--timebg);
+      font-weight: 800;
+    }
+
+    /* 인쇄 (A4 세로 1장) */
+    @media print{
+      @page { size: A4 portrait; margin: 12mm; }
+      body{ background:#fff; }
+      .appbar{ display:none; }
+      .wrap{ max-width:none; padding:0; }
+      .planner{ border-radius: 0; }
+    }
+  </style>
 </head>
 <body>
 
-<section class="page" style="--bg:#fff4f8; --border:#f2c7d6; --header:#ffe0eb; --timebg:#ffedf4;">
-  <div class="title">분홍</div>
-  <table class="planner">
-    <thead>
-      <tr>
-        <th class="start">시작</th>
-        <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td class='time'>06:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>07:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>08:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>09:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>10:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>11:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>12:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>13:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>14:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>15:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>16:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>17:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>18:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>19:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>20:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>21:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>22:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>23:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>00:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>01:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    </tbody>
-  </table>
-</section>
+  <header class="appbar">
+    <div class="appbar-inner">
+      <div class="title">파스텔톤 주간 플래너</div>
+      <div class="theme-bar" id="themeBar"></div>
+    </div>
+  </header>
 
-<section class="page" style="--bg:#fff6f0; --border:#f3d2bf; --header:#ffe6d8; --timebg:#fff1e8;">
-  <div class="title">연주황</div>
-  <table class="planner">
-    <thead>
-      <tr>
-        <th class="start">시작</th>
-        <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td class='time'>06:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>07:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>08:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>09:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>10:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>11:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>12:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>13:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>14:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>15:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>16:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>17:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>18:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>19:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>20:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>21:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>22:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>23:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>00:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>01:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    </tbody>
-  </table>
-</section>
+  <main class="wrap">
+    <table class="planner" aria-label="주간 플래너">
+      <thead>
+        <tr>
+          <th class="start">시작</th>
+          <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </main>
 
-<section class="page" style="--bg:#fffce8; --border:#efe0a8; --header:#fff3c9; --timebg:#fff8dd;">
-  <div class="title">연노랑</div>
-  <table class="planner">
-    <thead>
+  <script>
+    // 1) 시간표 생성 (20칸)
+    const times = [
+      "06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00",
+      "16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00","00:00","01:00"
+    ];
+    const rowsEl = document.getElementById("rows");
+    rowsEl.innerHTML = times.map(t => `
       <tr>
-        <th class="start">시작</th>
-        <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
+        <td class="time">${t}</td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
       </tr>
-    </thead>
-    <tbody>
-      <tr><td class='time'>06:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>07:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>08:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>09:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>10:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>11:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>12:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>13:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>14:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>15:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>16:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>17:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>18:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>19:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>20:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>21:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>22:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>23:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>00:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>01:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    </tbody>
-  </table>
-</section>
+    `).join("");
 
-<section class="page" style="--bg:#f1fffb; --border:#bfe6da; --header:#d7fff3; --timebg:#eafff8;">
-  <div class="title">민트</div>
-  <table class="planner">
-    <thead>
-      <tr>
-        <th class="start">시작</th>
-        <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td class='time'>06:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>07:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>08:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>09:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>10:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>11:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>12:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>13:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>14:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>15:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>16:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>17:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>18:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>19:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>20:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>21:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>22:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>23:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>00:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>01:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    </tbody>
-  </table>
-</section>
+    // 2) 테마 정의
+    const THEMES = [
+      { key:"pink",     name:"분홍",   bg:"#fff4f8", border:"#f2c7d6", header:"#ffe0eb", timebg:"#ffedf4" },
+      { key:"peach",    name:"연주황", bg:"#fff6f0", border:"#f3d2bf", header:"#ffe6d8", timebg:"#fff1e8" },
+      { key:"yellow",   name:"연노랑", bg:"#fffce8", border:"#efe0a8", header:"#fff3c9", timebg:"#fff8dd" },
+      { key:"mint",     name:"민트",   bg:"#f1fffb", border:"#bfe6da", header:"#d7fff3", timebg:"#eafff8" },
+      { key:"periw",    name:"라이트 블루 바이올렛", bg:"#f3f5ff", border:"#c8cef2", header:"#e1e6ff", timebg:"#eef0ff" },
+      { key:"lav",      name:"연보라", bg:"#faf4ff", border:"#dcc7f0", header:"#efe3ff", timebg:"#f6efff" },
+      { key:"ivory",    name:"아이보리", bg:"#fffdf4", border:"#e7dfc9", header:"#f7f0da", timebg:"#fff8e8" },
+    ];
 
-<section class="page" style="--bg:#f3f5ff; --border:#c8cef2; --header:#e1e6ff; --timebg:#eef0ff;">
-  <div class="title">라이트 블루 바이올렛</div>
-  <table class="planner">
-    <thead>
-      <tr>
-        <th class="start">시작</th>
-        <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td class='time'>06:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>07:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>08:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>09:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>10:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>11:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>12:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>13:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>14:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>15:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>16:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>17:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>18:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>19:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>20:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>21:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>22:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>23:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>00:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>01:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    </tbody>
-  </table>
-</section>
+    const STORAGE_KEY = "planner_theme";
+    const themeBar = document.getElementById("themeBar");
 
-<section class="page" style="--bg:#faf4ff; --border:#dcc7f0; --header:#efe3ff; --timebg:#f6efff;">
-  <div class="title">연보라</div>
-  <table class="planner">
-    <thead>
-      <tr>
-        <th class="start">시작</th>
-        <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td class='time'>06:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>07:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>08:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>09:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>10:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>11:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>12:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>13:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>14:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>15:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>16:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>17:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>18:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>19:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>20:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>21:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>22:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>23:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>00:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>01:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    </tbody>
-  </table>
-</section>
+    function applyTheme(themeKey){
+      const t = THEMES.find(x => x.key === themeKey) || THEMES[0];
+      document.documentElement.style.setProperty("--bg", t.bg);
+      document.documentElement.style.setProperty("--border", t.border);
+      document.documentElement.style.setProperty("--header", t.header);
+      document.documentElement.style.setProperty("--timebg", t.timebg);
 
-<section class="page" style="--bg:#fffdf4; --border:#e7dfc9; --header:#f7f0da; --timebg:#fff8e8;">
-  <div class="title">아이보리</div>
-  <table class="planner">
-    <thead>
-      <tr>
-        <th class="start">시작</th>
-        <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td class='time'>06:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>07:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>08:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>09:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>10:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>11:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>12:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>13:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>14:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>15:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>16:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>17:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>18:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>19:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>20:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>21:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>22:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>23:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>00:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='time'>01:00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    </tbody>
-  </table>
-</section>
+      // active 표시
+      [...themeBar.querySelectorAll(".theme-btn")].forEach(btn=>{
+        btn.classList.toggle("active", btn.dataset.key === t.key);
+      });
+
+      localStorage.setItem(STORAGE_KEY, t.key);
+    }
+
+    // 버튼 렌더
+    themeBar.innerHTML = THEMES.map(t => `
+      <button class="theme-btn" type="button" data-key="${t.key}">${t.name}</button>
+    `).join("");
+
+    themeBar.addEventListener("click", (e)=>{
+      const btn = e.target.closest(".theme-btn");
+      if(!btn) return;
+      applyTheme(btn.dataset.key);
+    });
+
+    // 초기 테마 로드
+    applyTheme(localStorage.getItem(STORAGE_KEY) || "pink");
+  </script>
 
 </body>
 </html>
