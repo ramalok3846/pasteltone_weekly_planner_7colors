@@ -11,6 +11,7 @@
       --header:#ffe0eb;
       --timebg:#ffedf4;
       --text:#111;
+      --focus: color-mix(in srgb, var(--border) 70%, #000 30%);
     }
 
     *{ box-sizing:border-box; }
@@ -33,17 +34,36 @@
     .appbar-inner{
       max-width: 1100px;
       margin: 0 auto;
-      padding: 12px 12px;
+      padding: 10px 12px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .left{
       display:flex;
       gap:10px;
       align-items:center;
-      justify-content:space-between;
+      min-width: 180px;
     }
     .title{
       font-weight: 800;
       font-size: 16px;
       letter-spacing: -0.2px;
       white-space: nowrap;
+    }
+    .hint{
+      font-size: 12px;
+      opacity: 0.7;
+      white-space: nowrap;
+    }
+
+    .right{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap: wrap;
     }
 
     .theme-bar{
@@ -71,7 +91,20 @@
       opacity: 1;
     }
 
-    /* 플래너 영역 */
+    .btn{
+      border: 1px solid var(--border);
+      background: white;
+      padding: 6px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 13px;
+      opacity: .95;
+      user-select:none;
+    }
+    .btn:hover{ opacity: 1; }
+
+    /* 플래너 */
     .wrap{
       max-width: 1100px;
       margin: 0 auto;
@@ -105,13 +138,32 @@
       font-weight: 800;
     }
 
-    /* 인쇄 (A4 세로 1장) */
+    /* 입력 셀 */
+    .planner td.editable{
+      cursor: text;
+      text-align: left;
+      padding: 6px 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      outline: none;
+    }
+    .planner td.editable:focus{
+      box-shadow: inset 0 0 0 2px var(--focus);
+      background: color-mix(in srgb, var(--header) 22%, white 78%);
+    }
+    .planner td.editable.empty::before{
+      content: "클릭해서 입력";
+      opacity: .25;
+    }
+
+    /* 인쇄 */
     @media print{
       @page { size: A4 portrait; margin: 12mm; }
       body{ background:#fff; }
       .appbar{ display:none; }
       .wrap{ max-width:none; padding:0; }
       .planner{ border-radius: 0; }
+      .planner td.editable.empty::before{ content: ""; }
     }
   </style>
 </head>
@@ -119,8 +171,16 @@
 
   <header class="appbar">
     <div class="appbar-inner">
-      <div class="title">파스텔톤 주간 플래너</div>
-      <div class="theme-bar" id="themeBar"></div>
+      <div class="left">
+        <div class="title">파스텔톤 주간 플래너</div>
+        <div class="hint">칸 클릭 → 입력 · 자동저장</div>
+      </div>
+
+      <div class="right">
+        <button class="btn" id="printBtn" type="button">인쇄</button>
+        <button class="btn" id="clearBtn" type="button">이번 테마 내용 지우기</button>
+        <div class="theme-bar" id="themeBar"></div>
+      </div>
     </div>
   </header>
 
@@ -137,49 +197,65 @@
   </main>
 
   <script>
-    // 1) 시간표 생성 (20칸)
+    // ===== 1) 시간표 생성 (20칸) =====
     const times = [
       "06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00",
       "16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00","00:00","01:00"
     ];
     const rowsEl = document.getElementById("rows");
-    rowsEl.innerHTML = times.map(t => `
-      <tr>
-        <td class="time">${t}</td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-    `).join("");
 
-    // 2) 테마 정의
+    function renderGrid(){
+      rowsEl.innerHTML = times.map((t, r) => `
+        <tr>
+          <td class="time">${t}</td>
+          ${Array.from({length:7}).map((_, c) =>
+            `<td class="editable empty" contenteditable="true" spellcheck="false" data-r="${r}" data-c="${c}"></td>`
+          ).join("")}
+        </tr>
+      `).join("");
+    }
+
+    renderGrid();
+
+    // ===== 2) 테마 =====
     const THEMES = [
-      { key:"pink",     name:"분홍",   bg:"#fff4f8", border:"#f2c7d6", header:"#ffe0eb", timebg:"#ffedf4" },
-      { key:"peach",    name:"연주황", bg:"#fff6f0", border:"#f3d2bf", header:"#ffe6d8", timebg:"#fff1e8" },
-      { key:"yellow",   name:"연노랑", bg:"#fffce8", border:"#efe0a8", header:"#fff3c9", timebg:"#fff8dd" },
-      { key:"mint",     name:"민트",   bg:"#f1fffb", border:"#bfe6da", header:"#d7fff3", timebg:"#eafff8" },
-      { key:"periw",    name:"라이트 블루 바이올렛", bg:"#f3f5ff", border:"#c8cef2", header:"#e1e6ff", timebg:"#eef0ff" },
-      { key:"lav",      name:"연보라", bg:"#faf4ff", border:"#dcc7f0", header:"#efe3ff", timebg:"#f6efff" },
-      { key:"ivory",    name:"아이보리", bg:"#fffdf4", border:"#e7dfc9", header:"#f7f0da", timebg:"#fff8e8" },
+      { key:"pink",  name:"분홍",   bg:"#fff4f8", border:"#f2c7d6", header:"#ffe0eb", timebg:"#ffedf4" },
+      { key:"peach", name:"연주황", bg:"#fff6f0", border:"#f3d2bf", header:"#ffe6d8", timebg:"#fff1e8" },
+      { key:"yellow",name:"연노랑", bg:"#fffce8", border:"#efe0a8", header:"#fff3c9", timebg:"#fff8dd" },
+      { key:"mint",  name:"민트",   bg:"#f1fffb", border:"#bfe6da", header:"#d7fff3", timebg:"#eafff8" },
+      { key:"periw", name:"라이트 블루 바이올렛", bg:"#f3f5ff", border:"#c8cef2", header:"#e1e6ff", timebg:"#eef0ff" },
+      { key:"lav",   name:"연보라", bg:"#faf4ff", border:"#dcc7f0", header:"#efe3ff", timebg:"#f6efff" },
+      { key:"ivory", name:"아이보리", bg:"#fffdf4", border:"#e7dfc9", header:"#f7f0da", timebg:"#fff8e8" },
     ];
 
-    const STORAGE_KEY = "planner_theme";
+    const STORAGE_THEME_KEY = "planner_theme";
     const themeBar = document.getElementById("themeBar");
+
+    // 입력 데이터는 테마별로 저장
+    // key 예: planner_data_pink
+    const dataKey = (themeKey) => `planner_data_${themeKey}`;
+
+    let currentThemeKey = localStorage.getItem(STORAGE_THEME_KEY) || "pink";
 
     function applyTheme(themeKey){
       const t = THEMES.find(x => x.key === themeKey) || THEMES[0];
+      currentThemeKey = t.key;
+
       document.documentElement.style.setProperty("--bg", t.bg);
       document.documentElement.style.setProperty("--border", t.border);
       document.documentElement.style.setProperty("--header", t.header);
       document.documentElement.style.setProperty("--timebg", t.timebg);
 
-      // active 표시
       [...themeBar.querySelectorAll(".theme-btn")].forEach(btn=>{
         btn.classList.toggle("active", btn.dataset.key === t.key);
       });
 
-      localStorage.setItem(STORAGE_KEY, t.key);
+      localStorage.setItem(STORAGE_THEME_KEY, t.key);
+
+      // 테마 바뀌면 그 테마 저장 데이터 로드
+      loadAllCells();
     }
 
-    // 버튼 렌더
     themeBar.innerHTML = THEMES.map(t => `
       <button class="theme-btn" type="button" data-key="${t.key}">${t.name}</button>
     `).join("");
@@ -190,8 +266,93 @@
       applyTheme(btn.dataset.key);
     });
 
-    // 초기 테마 로드
-    applyTheme(localStorage.getItem(STORAGE_KEY) || "pink");
+    // ===== 3) 자동저장/복원 =====
+    function getData(){
+      try{
+        return JSON.parse(localStorage.getItem(dataKey(currentThemeKey)) || "{}");
+      }catch{
+        return {};
+      }
+    }
+
+    function setData(obj){
+      localStorage.setItem(dataKey(currentThemeKey), JSON.stringify(obj));
+    }
+
+    function cellId(r,c){ return `${r}-${c}`; }
+
+    function loadAllCells(){
+      const data = getData();
+      document.querySelectorAll("td.editable").forEach(td=>{
+        const r = td.dataset.r, c = td.dataset.c;
+        const value = data[cellId(r,c)] || "";
+        td.textContent = value;
+        td.classList.toggle("empty", value.trim() === "");
+      });
+    }
+
+    function saveCell(td){
+      const r = td.dataset.r, c = td.dataset.c;
+      const id = cellId(r,c);
+      const value = td.textContent.replace(/\s+$/,""); // 끝 공백 정리
+
+      const data = getData();
+      if(value.trim() === ""){
+        delete data[id];
+      }else{
+        data[id] = value;
+      }
+      setData(data);
+
+      td.classList.toggle("empty", value.trim() === "");
+    }
+
+    // 입력 이벤트 (타이핑할 때마다 저장)
+    rowsEl.addEventListener("input", (e)=>{
+      const td = e.target.closest("td.editable");
+      if(!td) return;
+      saveCell(td);
+    });
+
+    // Enter는 줄바꿈 대신 다음 줄로 이동하고 싶으면 막아도 되는데,
+    // 지금은 "짧은 메모 + 필요하면 줄바꿈"도 되도록 허용함.
+    // 만약 Enter 줄바꿈이 싫으면 아래 주석 해제:
+    /*
+    rowsEl.addEventListener("keydown", (e)=>{
+      const td = e.target.closest("td.editable");
+      if(!td) return;
+      if(e.key === "Enter"){
+        e.preventDefault();
+        td.blur();
+      }
+    });
+    */
+
+    // 포커스 들어갈 때 placeholder 처리
+    rowsEl.addEventListener("focusin", (e)=>{
+      const td = e.target.closest("td.editable");
+      if(!td) return;
+      td.classList.remove("empty");
+    });
+
+    rowsEl.addEventListener("focusout", (e)=>{
+      const td = e.target.closest("td.editable");
+      if(!td) return;
+      saveCell(td);
+    });
+
+    // ===== 4) 버튼 =====
+    document.getElementById("printBtn").addEventListener("click", ()=> window.print());
+
+    document.getElementById("clearBtn").addEventListener("click", ()=>{
+      const ok = confirm("현재 선택한 테마의 입력 내용을 모두 지울까요?");
+      if(!ok) return;
+      localStorage.removeItem(dataKey(currentThemeKey));
+      loadAllCells();
+    });
+
+    // 초기 로드
+    applyTheme(currentThemeKey);
   </script>
 
 </body>
