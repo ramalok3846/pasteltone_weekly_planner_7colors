@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>파스텔톤 주간 플래너</title>
 
-  <!-- ✅ FAVICON (사용자 파일명 기준) -->
-  <link rel="icon" href="./PWP7_favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" href="./PWP7_favicon.png">
+  <!-- ✅ FAVICON: ultra 파일명으로 수정 -->
+  <link rel="icon" href="./PWP7_favicon_ultra.ico" sizes="any">
+  <link rel="icon" type="image/png" href="./PWP7_favicon_ultra.png">
 
   <style>
     :root{
-      /* theme default (pink) */
-      --bg:#fff4f8;
-      --border:#f2c7d6;
-      --header:#ffe0eb;
-      --timebg:#ffedf4;
+      /* theme default (ivory-ish) */
+      --bg:#fffdf5;
+      --border:#e6ddc8;
+      --header:#f6f0df;
+      --timebg:#fffaf0;
       --text:#111;
       --card: color-mix(in srgb, var(--bg) 75%, #fff 25%);
 
@@ -30,7 +30,6 @@
       /* print */
       --paper: portrait; /* portrait | landscape */
       --printMargin: 6mm;
-      --printScale: 1;
 
       /* mode */
       --mode: auto; /* auto | pc | mobile */
@@ -178,7 +177,6 @@
       gap:4px;
       min-width: 220px;
     }
-    /* 기본 제목은 항상 보여야 함 */
     .planner-title{
       font-weight: 1000;
       font-size: 18px;
@@ -244,7 +242,7 @@
       z-index: 4;
     }
 
-    /* corner diagonal - thin line */
+    /* corner diagonal - thin */
     .planner th.corner{
       position: sticky;
       top: 0;
@@ -265,12 +263,11 @@
       inset:0;
       background:
         linear-gradient(135deg,
-          transparent 49.65%,
+          transparent 49.7%,
           color-mix(in srgb, var(--border) 92%, #fff 8%) 50%,
-          transparent 50.35%);
+          transparent 50.3%);
       pointer-events:none;
     }
-    /* 왼아래=시간, 오른위=요일 */
     .cornerTime{
       position:absolute;
       left: 10px;
@@ -303,28 +300,33 @@
       font-weight: 900;
       min-height: 12px;
     }
-    /* 날짜 OFF면 date 라인 숨기고 name을 중앙으로 */
     .no-date .dow{ justify-content:center; }
     .no-date .dow .date{ display:none; }
 
     .sat .name, .sat .date{ color: var(--sat); opacity: .9; }
     .sun .name, .sun .date{ color: var(--sun); opacity: .9; }
 
-    /* cell */
+    /* ✅ 셀: 엑셀처럼 바로 입력 가능(contenteditable) */
     .planner td.cell{
-      cursor: pointer;
+      cursor: text;
       text-align: left;
       padding: 6px 8px;
       white-space: pre-wrap;
       word-break: break-word;
       background: #fff;
+      outline: none;
     }
     .planner td.cell:hover{
       background: color-mix(in srgb, var(--header) 18%, white 82%);
     }
-    .planner td.cell.empty::before{
+    .planner td.cell:focus{
+      box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--border) 55%, transparent 45%);
+      background: #fff;
+    }
+    .planner td.cell.empty:not(:focus)::before{
       content: "클릭해서 입력";
       opacity: .25;
+      pointer-events:none;
     }
 
     /* resize handle */
@@ -334,6 +336,7 @@
       user-select:none;
       touch-action:none;
       background: transparent;
+      pointer-events:auto;
     }
     .resize-col{
       top: 6px;
@@ -433,10 +436,6 @@
       line-height: 1.4;
       outline: none;
     }
-    textarea{
-      min-height: 220px;
-      resize: vertical;
-    }
     textarea:focus, input[type="text"]:focus{
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--border) 50%, transparent 50%);
     }
@@ -515,14 +514,10 @@
       opacity: .95;
     }
 
-    /* ===== PRINT: clone board ===== */
-    #printBoard{
-      display:none;
-    }
-    @media print{
-      /* ✅ 프린트에서는 가로에서 2장 넘어가는 것 방지용(조금 줄임) */
-      :root{ --rowH: 32px; }
+    /* ===== PRINT ===== */
+    #printBoard{ display:none; }
 
+    @media print{
       body{
         background:#fff;
         -webkit-print-color-adjust: exact;
@@ -532,53 +527,43 @@
         size: A4 var(--paper);
         margin: var(--printMargin);
       }
-      .appbar, .wrap{ display:none !important; }
 
-      #printBoard{
-        display:block !important;
-      }
-      #printBoard .print-card{
-        background:#fff;
-        border:none;
-        padding:0;
-      }
+      .appbar, .wrap{ display:none !important; }
+      #printBoard{ display:block !important; }
+
+      /* ✅ 프린트에서는 반드시 1장에 들어가게 타이트하게 */
+      html[data-paper="portrait"] { --rowH: 30px; }
+      html[data-paper="landscape"]{ --rowH: 24px; } /* 가로 2장 잘림 방지 (강하게 줄임) */
+
       #printBoard .print-title{
         font-weight:1000;
-        font-size:18px;
-        margin: 0 0 8px 0;
+        font-size:16px;
+        margin: 0 0 4px 0;
       }
       #printBoard .print-meta{
-        font-size:12px;
+        font-size:11px;
         font-weight:900;
         opacity:.75;
-        margin: 0 0 10px 0;
-        min-height: 14px;
+        margin: 0 0 6px 0;
+        min-height: 12px;
       }
 
       #printBoard table{
-        width:100%;
+        width: 100%;
         border-collapse: collapse;
         table-layout: fixed;
-        transform: scale(var(--printScale));
-        transform-origin: top left;
         border: 1px solid var(--border);
+        break-inside: avoid;
       }
       #printBoard th, #printBoard td{
         border: 1px solid var(--border);
-        padding: 6px 6px;
-        font-size: 13px;
+        padding: 4px 5px;
+        font-size: 12px;
         height: var(--rowH);
         vertical-align: middle;
       }
-      #printBoard thead th{
-        background: var(--header);
-        font-weight:900;
-      }
-      #printBoard td.time{
-        background: var(--timebg);
-        font-weight:900;
-      }
-      #printBoard td.cell.empty::before{ content:""; } /* placeholder 제거 */
+      #printBoard thead th{ background: var(--header); font-weight:900; }
+      #printBoard td.time{ background: var(--timebg); font-weight:900; }
     }
 
     /* ===== mode: mobile ===== */
@@ -594,14 +579,14 @@
 </head>
 
 <body>
-  <!-- PRINT BOARD (clone here before print) -->
+  <!-- PRINT BOARD -->
   <div id="printBoard"></div>
 
   <header class="appbar">
     <div class="appbar-inner">
       <div class="left">
         <div class="brand">파스텔톤 주간 플래너</div>
-        <div class="hint">칸 클릭 → 입력 · ↔/↕로 전체 칸 크기 조절</div>
+        <div class="hint">칸 클릭 → 바로 입력(자동 저장) · ↔/↕로 전체 칸 크기 조절</div>
 
         <button class="btn" id="noticeBtn" type="button">공지</button>
 
@@ -691,26 +676,6 @@
     </div>
   </main>
 
-  <!-- 메모 모달 -->
-  <div class="backdrop" id="memoBackdrop" aria-modal="true" role="dialog">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title">
-          <span class="pill" id="pillTime">--:--</span>
-          <span class="pill" id="pillDay">요일</span>
-        </div>
-        <button class="btn" id="closeMemo" type="button">닫기</button>
-      </div>
-      <div class="modal-body">
-        <textarea id="memoText" placeholder="여기에 내용을 입력해줘."></textarea>
-      </div>
-      <div class="modal-actions">
-        <button class="btn ghost" id="clearCellBtn" type="button">이 칸 비우기</button>
-        <button class="btn" id="saveMemo" type="button">저장</button>
-      </div>
-    </div>
-  </div>
-
   <!-- 제목 편집 모달 -->
   <div class="backdrop" id="titleBackdrop" aria-modal="true" role="dialog">
     <div class="modal">
@@ -752,7 +717,7 @@
           <span class="week-badge" id="mwBadge"></span>
         </div>
 
-        <div class="cal-grid" id="calGrid">
+        <div class="cal-grid">
           <div class="cal-dow">
             <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div>
             <div class="sat">토</div><div class="sun">일</div>
@@ -803,7 +768,7 @@
     const K = {
       data: "planner_data",
       title: "planner_custom_title",
-      titleAuto: "planner_title_is_auto", // "1" if auto-created by date link
+      titleAuto: "planner_title_is_auto",
       dateOn: "planner_date_link_enabled",
       mw: "planner_monthweek",
       ori: "planner_print_orientation",
@@ -851,15 +816,6 @@
     const colResize = document.getElementById("colResize");
     const rowResize = document.getElementById("rowResize");
 
-    // memo modal
-    const memoBackdrop = document.getElementById("memoBackdrop");
-    const memoText = document.getElementById("memoText");
-    const pillTime = document.getElementById("pillTime");
-    const pillDay  = document.getElementById("pillDay");
-    const closeMemo = document.getElementById("closeMemo");
-    const saveMemoBtn = document.getElementById("saveMemo");
-    const clearCellBtn = document.getElementById("clearCellBtn");
-
     // title modal
     const titleBackdrop = document.getElementById("titleBackdrop");
     const titleInput = document.getElementById("titleInput");
@@ -887,7 +843,6 @@
     // print board
     const printBoard = document.getElementById("printBoard");
 
-    let activeCell = null;
     let calYear = (new Date()).getFullYear();
     let calMonth = (new Date()).getMonth()+1;
     let selectedMonday = null;
@@ -895,6 +850,9 @@
     // ===== utils =====
     const pad2 = n => String(n).padStart(2,"0");
     const cellId = (r,c) => `${r}-${c}`;
+    const escapeHtml = (str)=> String(str).replace(/[&<>"']/g, s => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[s]));
 
     function setSwitchVisual(wrapper, checked){
       wrapper.classList.toggle("on", checked);
@@ -941,7 +899,7 @@
 
     // ===== theme =====
     function applyTheme(key){
-      const t = THEMES[key] || THEMES.pink;
+      const t = THEMES[key] || THEMES.ivory;
       document.documentElement.style.setProperty("--bg", t.bg);
       document.documentElement.style.setProperty("--border", t.border);
       document.documentElement.style.setProperty("--header", t.header);
@@ -949,7 +907,7 @@
       localStorage.setItem(K.theme, key);
     }
     function initTheme(){
-      const saved = localStorage.getItem(K.theme) || "pink";
+      const saved = localStorage.getItem(K.theme) || "ivory";
       themeSelect.value = saved;
       applyTheme(saved);
     }
@@ -973,81 +931,7 @@
     modeSelect.addEventListener("change", ()=> applyMode(modeSelect.value));
     window.addEventListener("resize", ()=> applyMode(modeSelect.value || "auto"));
 
-    // ===== render grid =====
-    function renderGrid(){
-      rowsEl.innerHTML = times.map((t, r)=>`
-        <tr>
-          <td class="time">${t}</td>
-          ${Array.from({length:7}).map((_, c)=>
-            `<td class="cell empty" data-r="${r}" data-c="${c}"></td>`
-          ).join("")}
-        </tr>
-      `).join("");
-    }
-    function updateCellDisplay(td, value){
-      td.textContent = value || "";
-      td.classList.toggle("empty", !value || value.trim()==="");
-    }
-    function loadAllCells(){
-      const data = getData();
-      document.querySelectorAll("td.cell").forEach(td=>{
-        const r = td.dataset.r, c = td.dataset.c;
-        updateCellDisplay(td, data[cellId(r,c)] || "");
-      });
-    }
-    function saveCellValue(r,c,value){
-      const data = getData();
-      const id = cellId(r,c);
-      const v = (value ?? "").replace(/\s+$/,"");
-      if(v.trim()==="") delete data[id];
-      else data[id] = v;
-      setData(data);
-
-      const td = document.querySelector(`td.cell[data-r="${r}"][data-c="${c}"]`);
-      if(td) updateCellDisplay(td, v);
-    }
-
-    // ===== memo modal =====
-    function openMemo(td){
-      const r = Number(td.dataset.r);
-      const c = Number(td.dataset.c);
-      activeCell = { r, c, td };
-
-      const data = getData();
-      const value = data[cellId(r,c)] || "";
-
-      pillTime.textContent = times[r];
-      pillDay.textContent = days[c];
-
-      memoText.value = value;
-      memoBackdrop.style.display = "flex";
-      setTimeout(()=>memoText.focus(), 50);
-    }
-    function closeMemoModal(){
-      memoBackdrop.style.display = "none";
-      activeCell = null;
-    }
-    rowsEl.addEventListener("click", (e)=>{
-      const td = e.target.closest("td.cell");
-      if(td) openMemo(td);
-    });
-    saveMemoBtn.addEventListener("click", ()=>{
-      if(!activeCell) return;
-      saveCellValue(activeCell.r, activeCell.c, memoText.value);
-      closeMemoModal();
-    });
-    clearCellBtn.addEventListener("click", ()=>{
-      if(!activeCell) return;
-      memoText.value = "";
-      saveCellValue(activeCell.r, activeCell.c, "");
-      closeMemoModal();
-    });
-    closeMemo.addEventListener("click", closeMemoModal);
-    memoBackdrop.addEventListener("click", (e)=>{
-      if(e.target === memoBackdrop) closeMemoModal();
-    });
-
-    // ===== title (always show "주간 플래너" baseline) =====
+    // ===== title =====
     function getTitle(){
       const t = (localStorage.getItem(K.title) || "").trim();
       return t ? t : "주간 플래너";
@@ -1067,7 +951,6 @@
       plannerTitleText.childNodes[0].textContent = getTitle() + " ";
     }
 
-    // title modal
     function openTitleModal(){
       titleInput.value = (localStorage.getItem(K.title) || "").trim();
       titleBackdrop.style.display = "flex";
@@ -1095,7 +978,6 @@
       plannerMetaText.textContent = "";
       plannerTable.classList.add("no-date");
     }
-
     function applyWeekMonday(monday){
       plannerTable.classList.remove("no-date");
 
@@ -1118,14 +1000,11 @@
       setSwitchVisual(dateSwitch, enable);
       localStorage.setItem(K.dateOn, enable ? "1":"0");
 
-      // 주 선택 버튼: 날짜 연동 ON일 때만 표시
       pickWeekBtn.style.display = enable ? "inline-flex" : "none";
 
       if(!enable){
-        // 날짜/메타 제거 + 중앙정렬 모드
         clearHeaderDates();
 
-        // 자동 제목이었다면 기본으로 복귀
         const wasAuto = localStorage.getItem(K.titleAuto) === "1";
         const storedTitle = (localStorage.getItem(K.title) || "").trim();
         if(wasAuto && storedTitle.length > 0){
@@ -1134,7 +1013,6 @@
           applyTitleToUI();
         }
       }else{
-        // 저장된 week가 있으면 헤더 날짜 적용
         const saved = localStorage.getItem(K.mw);
         if(saved){
           const [sy, sm, sw] = saved.split("-");
@@ -1147,13 +1025,11 @@
           selectedMonday = selected;
           applyWeekMonday(getMondayFromDate(selectedMonday));
         }else{
-          // 켰는데 아직 선택 안 했으면 날짜줄은 비워둠(단, no-date는 해제)
           plannerTable.classList.remove("no-date");
           plannerMetaText.textContent = "";
           document.querySelectorAll(".date[data-dow]").forEach(el=> el.textContent="");
         }
 
-        // ✅ 날짜 연동 ON 했는데 저장된 주가 없다면 바로 주 선택창 열기
         if(!localStorage.getItem(K.mw)){
           openCal();
         }
@@ -1164,7 +1040,7 @@
       enableDateLink(!dateLinkToggle.checked);
     });
 
-    // ===== calendar UI =====
+    // ===== calendar =====
     function openCal(){
       calBackdrop.style.display = "flex";
       renderCalendar(calYear, calMonth);
@@ -1213,7 +1089,7 @@
       }
     }
 
-    pickWeekBtn.addEventListener("click", ()=>{
+    document.getElementById("pickWeekBtn").addEventListener("click", ()=>{
       if(!dateLinkToggle.checked){
         enableDateLink(true);
       }
@@ -1249,7 +1125,6 @@
       enableDateLink(true);
       applyWeekMonday(monday);
 
-      // ✅ 자동 제목: 사용자가 직접 저장한 제목이 "있고(auto가 아니면)" 덮어쓰지 않음
       const storedTitle = (localStorage.getItem(K.title) || "").trim();
       const titleAuto = localStorage.getItem(K.titleAuto) === "1";
       const userHasCustomTitle = storedTitle.length > 0 && !titleAuto;
@@ -1272,6 +1147,7 @@
     // ===== orientation =====
     function applyOrientation(value){
       document.documentElement.style.setProperty("--paper", value);
+      document.documentElement.dataset.paper = value; // ✅ print CSS가 이걸 사용
       localStorage.setItem(K.ori, value);
     }
     function initOrientation(){
@@ -1281,77 +1157,31 @@
     }
     orientationSelect.addEventListener("change", ()=> applyOrientation(orientationSelect.value));
 
-    // ===== PRINT (clone) =====
-    function mmToPx(mm){ return mm * (96/25.4); }
-
+    // ===== PRINT =====
     function buildPrintBoard(){
       const title = getTitle();
       const meta = plannerMetaText.textContent || "";
+
+      // 현재 테이블을 그대로 복제하되, contenteditable/placeholder는 제거
       const tableClone = plannerTable.cloneNode(true);
+      tableClone.querySelectorAll("td.cell").forEach(td=>{
+        td.removeAttribute("contenteditable");
+        td.classList.remove("empty");
+      });
 
       printBoard.innerHTML = `
-        <div class="print-card">
-          <div class="print-title">${escapeHtml(title)}</div>
-          <div class="print-meta">${escapeHtml(meta)}</div>
-        </div>
+        <div class="print-title">${escapeHtml(title)}</div>
+        <div class="print-meta">${escapeHtml(meta)}</div>
       `;
-      printBoard.querySelector(".print-card").appendChild(tableClone);
+      printBoard.appendChild(tableClone);
     }
-
-    function escapeHtml(str){
-      return String(str).replace(/[&<>"']/g, s => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[s]));
-    }
-
-    // ✅ 인쇄 스케일 계산(세로 너무 작음 / 가로 2장 잘림 해결용)
-    function computePrintScale(){
-      const paper = getComputedStyle(document.documentElement).getPropertyValue("--paper").trim() || "portrait";
-      const marginMm = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--printMargin")) || 6;
-
-      const a4wMm = (paper === "landscape") ? 297 : 210;
-      const a4hMm = (paper === "landscape") ? 210 : 297;
-
-      const printableW = mmToPx(a4wMm - 2*marginMm);
-      const printableH = mmToPx(a4hMm - 2*marginMm);
-
-      // 측정 위해 잠깐 표시
-      printBoard.style.display = "block";
-
-      const card = printBoard.querySelector(".print-card");
-      const table = printBoard.querySelector("table");
-
-      // 전체 콘텐츠 크기
-      const contentW = Math.max(card.scrollWidth, table.scrollWidth);
-      const contentH = card.scrollHeight;
-
-      let scale = Math.min(printableW / contentW, printableH / contentH);
-
-      // 세로는 약간 확대 허용(너무 작게 나오는 것 방지)
-      const maxScale = (paper === "portrait") ? 1.15 : 1.0;
-      scale = Math.min(scale, maxScale);
-
-      // 너무 작아지는 것 방지 (가로는 2장 방지 위해 더 낮게 허용)
-      const minScale = (paper === "landscape") ? 0.45 : 0.55;
-      scale = Math.max(scale, minScale);
-
-      document.documentElement.style.setProperty("--printScale", String(scale));
-
-      // 다시 숨김
-      printBoard.style.display = "";
-    }
-
-    window.addEventListener("beforeprint", ()=>{
-      buildPrintBoard();
-      computePrintScale();
-    });
 
     printBtn.addEventListener("click", ()=>{
       alert("색상 배경이 그대로 나오려면 인쇄 설정에서 '배경 그래픽(배경색/이미지)'를 켜줘!");
       buildPrintBoard();
-      computePrintScale();
       window.print();
     });
+    window.addEventListener("beforeprint", buildPrintBoard);
 
     // ===== resize uniform =====
     function px(n){ return `${Math.round(n)}px`; }
@@ -1400,7 +1230,7 @@
         }else{
           const dy = p.clientY - startY;
           let next = startVal + dy;
-          next = Math.max(28, Math.min(90, next));
+          next = Math.max(24, Math.min(90, next));
           const val = px(next);
           document.documentElement.style.setProperty("--rowH", val);
           localStorage.setItem(K.rowH, val);
@@ -1439,7 +1269,7 @@
       document.documentElement.style.setProperty("--dayW", "140px");
       document.documentElement.style.setProperty("--rowH", "36px");
       document.documentElement.style.setProperty("--paper", "portrait");
-      document.documentElement.style.setProperty("--printScale", "1");
+      document.documentElement.dataset.paper = "portrait";
 
       initTheme();
       initMode();
@@ -1476,7 +1306,7 @@
           orientation: localStorage.getItem(K.ori) || "portrait",
           dayW: localStorage.getItem(K.dayW) || "",
           rowH: localStorage.getItem(K.rowH) || "",
-          theme: localStorage.getItem(K.theme) || "pink",
+          theme: localStorage.getItem(K.theme) || "ivory",
           mode: localStorage.getItem(K.mode) || "auto"
         },
         data: getData()
@@ -1546,28 +1376,90 @@
       }
     });
 
-    // ===== init =====
+    // ===== grid render + editable save =====
+    function renderGrid(){
+      rowsEl.innerHTML = times.map((t, r)=>`
+        <tr>
+          <td class="time">${t}</td>
+          ${Array.from({length:7}).map((_, c)=>
+            `<td class="cell empty" contenteditable="true" spellcheck="false" data-r="${r}" data-c="${c}"></td>`
+          ).join("")}
+        </tr>
+      `).join("");
+    }
+
+    function updateCellDisplay(td, value){
+      td.textContent = value || "";
+      td.classList.toggle("empty", !value || value.trim()==="");
+    }
+
+    function loadAllCells(){
+      const data = getData();
+      document.querySelectorAll("td.cell").forEach(td=>{
+        const r = td.dataset.r, c = td.dataset.c;
+        updateCellDisplay(td, data[cellId(r,c)] || "");
+      });
+    }
+
+    function saveCellValue(r,c,value){
+      const data = getData();
+      const id = cellId(r,c);
+      const v = (value ?? "").replace(/\s+$/,"");
+      if(v.trim()==="") delete data[id];
+      else data[id] = v;
+      setData(data);
+
+      const td = document.querySelector(`td.cell[data-r="${r}"][data-c="${c}"]`);
+      if(td) td.classList.toggle("empty", !v || v.trim()==="");
+    }
+
+    // ✅ 입력 자동저장: input + blur 모두 저장
+    function bindCellAutosave(){
+      rowsEl.addEventListener("input", (e)=>{
+        const td = e.target.closest("td.cell");
+        if(!td) return;
+        saveCellValue(td.dataset.r, td.dataset.c, td.textContent);
+      });
+      rowsEl.addEventListener("blur", (e)=>{
+        const td = e.target.closest("td.cell");
+        if(!td) return;
+        saveCellValue(td.dataset.r, td.dataset.c, td.textContent);
+      }, true);
+    }
+
+    // ===== init date link =====
     function initDateLink(){
       const enabled = localStorage.getItem(K.dateOn) === "1";
       enableDateLink(enabled);
     }
 
-    // build rows
+    // ===== mode init =====
+    function initMode(){
+      const saved = localStorage.getItem(K.mode) || "auto";
+      modeSelect.value = saved;
+      applyMode(saved);
+    }
+    modeSelect.addEventListener("change", ()=> applyMode(modeSelect.value));
+    window.addEventListener("resize", ()=> applyMode(modeSelect.value || "auto"));
+
+    // ===== switch visuals =====
+    function initSwitchVisual(){
+      setSwitchVisual(dateSwitch, dateLinkToggle.checked);
+    }
+
+    // ===== start =====
     renderGrid();
+    bindCellAutosave();
     loadAllCells();
 
-    // title always show
     applyTitleToUI();
 
-    // theme/mode/size/orientation/date
     initTheme();
     initMode();
     initSizeFromStorage();
     initOrientation();
     initDateLink();
-
-    // switch visuals
-    setSwitchVisual(dateSwitch, dateLinkToggle.checked);
+    initSwitchVisual();
   </script>
 </body>
 </html>
