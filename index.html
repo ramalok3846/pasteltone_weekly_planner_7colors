@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>파스텔톤 주간 플래너</title>
 
-  <!-- FAVICON -->
+  <!-- FAVICON (같은 폴더에 두는 기준) -->
   <link rel="icon" href="./PWP7_favicon_ultra.ico" sizes="any">
   <link rel="icon" type="image/png" href="./PWP7_favicon_ultra.png">
 
@@ -25,7 +25,7 @@
       --rowH:36px;
 
       --paper: portrait; /* portrait | landscape */
-      --printMargin: 6mm;
+      --printMargin: 5mm; /* ✅ 모바일 01:00 넘어감 방지로 조금 더 타이트하게 */
     }
 
     *{ box-sizing:border-box; }
@@ -156,7 +156,7 @@
       margin-bottom: 10px;
     }
 
-    /* ✅ 예전 감성: 둥근 직사각형 제목 박스 */
+    /* ✅ 둥근 직사각형 제목 박스 */
     .titleBox{
       display:inline-flex;
       align-items:center;
@@ -196,7 +196,7 @@
       background:#fff;
 
       border: 1px solid var(--border);
-      border-right: 1px solid var(--border); /* ✅ 오른쪽 끝 테두리 보강 */
+      border-right: 1px solid var(--border);
       border-radius: 12px;
       overflow: hidden;
     }
@@ -213,7 +213,7 @@
       font-size: 14px;
     }
 
-    /* ✅ 오른쪽 끝 세로선 강제(특정 브라우저에서 border가 날아가는 케이스 방지) */
+    /* ✅ 오른쪽 끝 세로선 강제 */
     .planner tr > *:last-child{
       border-right: 1px solid var(--border) !important;
     }
@@ -234,7 +234,7 @@
       z-index: 4;
     }
 
-    /* corner diagonal (thin, like before) */
+    /* corner diagonal */
     .planner th.corner{
       position: sticky;
       top: 0;
@@ -298,7 +298,7 @@
     .sat .name, .sat .date{ color: var(--sat); opacity: .95; }
     .sun .name, .sun .date{ color: var(--sun); opacity: .95; }
 
-    /* ✅ 셀: 팝업 입력용 */
+    /* ✅ 셀: 팝업 입력 */
     .planner td.cell{
       cursor: pointer;
       text-align: left;
@@ -360,6 +360,9 @@
       font-size: 12px;
       font-weight: 1000;
       opacity: .92;
+    }
+    .pill.soft{
+      background: color-mix(in srgb, var(--header) 25%, #fff 75%);
     }
     .modal-body{ padding: 12px; }
     .modal-actions{
@@ -426,10 +429,17 @@
       border-bottom: 1px solid var(--border);
       cursor:pointer;
       background:#fff;
+      transition: background .12s ease, transform .12s ease;
     }
     .cal-week:last-child{ border-bottom:none; }
     .cal-week:hover{
       background: color-mix(in srgb, var(--header) 18%, #fff 82%);
+      transform: translateY(-1px);
+    }
+    .cal-week.selected{
+      outline: 3px solid color-mix(in srgb, var(--border) 60%, #fff 40%);
+      border-radius: 10px;
+      overflow: hidden;
     }
     .cal-cell{
       padding: 10px 6px;
@@ -461,7 +471,6 @@
         margin: var(--printMargin);
       }
 
-      /* ✅ 인쇄 속도: 테이블 복제/생성 없이 그냥 현재 화면을 인쇄 */
       .appbar{ display:none !important; }
       .wrap{ max-width: none; padding: 0; margin: 0; }
       .card{ border:none; border-radius:0; padding:0; background:#fff; }
@@ -481,9 +490,16 @@
         position: static !important;
       }
 
-      /* 가로에서 2장 잘림 방지용으로 행 높이만 살짝 줄이기 */
-      html[data-paper="portrait"] { --rowH: 30px; }
-      html[data-paper="landscape"]{ --rowH: 24px; }
+      /* ✅ 모바일에서 01:00만 넘어가는 문제 방지(더 타이트) */
+      html[data-paper="portrait"]{ --rowH: 26px; }
+      html[data-paper="landscape"]{ --rowH: 22px; }
+
+      .planner th, .planner td{
+        padding: 4px 5px !important;
+        font-size: 12px !important;
+      }
+      .dow .date{ font-size: 10px !important; }
+      .cornerTime, .cornerDay{ font-size: 12px !important; }
     }
 
     @media (max-width: 520px){
@@ -497,7 +513,7 @@
     <div class="appbar-inner">
       <div class="left">
         <div class="brand">파스텔톤 주간 플래너</div>
-        <div class="hint">칸 클릭 → 팝업 입력 · 인쇄는 1장 고정</div>
+        <div class="hint">칸 클릭 → 팝업 입력 · Ctrl+Enter 저장</div>
 
         <button class="btn" id="noticeBtn" type="button">공지</button>
 
@@ -539,7 +555,6 @@
     <div class="card">
       <div class="title-row">
         <div>
-          <!-- ✅ 둥근 직사각형 제목 박스 -->
           <div class="titleBox" id="titleBox" title="클릭해서 제목 편집">
             <span id="plannerTitleText">주간 플래너</span>
             <span class="pill" style="font-size:11px;">편집</span>
@@ -580,12 +595,13 @@
     </div>
   </main>
 
-  <!-- ===== 셀 입력 모달(팝업 입력) ===== -->
+  <!-- ===== 셀 입력 모달 ===== -->
   <div class="backdrop" id="cellBackdrop" aria-modal="true" role="dialog">
     <div class="modal">
       <div class="modal-header">
         <div class="modal-title">
           <span class="pill">내용 입력</span>
+          <span class="pill soft" id="cellHotkey">Enter=줄바꿈 · Ctrl+Enter=저장</span>
           <span class="pill" id="cellLabel"></span>
         </div>
         <button class="btn" id="closeCell" type="button">닫기</button>
@@ -638,7 +654,7 @@
             <button class="btn" id="calToday" type="button">이번 달</button>
             <button class="btn" id="calNext" type="button">▶</button>
           </div>
-          <span class="pill" id="mwBadge">주를 선택해줘</span>
+          <span class="pill soft" id="mwBadge">주를 클릭하면 미리보기 적용</span>
         </div>
 
         <div class="cal-grid">
@@ -650,7 +666,7 @@
         </div>
 
         <div style="margin-top:10px;font-size:12px;font-weight:900;opacity:.75;">
-          · 월요일 시작 · “1일 포함 주 = 그 달 1주” · 주(가로줄) 클릭 → 선택
+          · 월요일 시작 · “1일 포함 주 = 그 달 1주” · 주(가로줄) 클릭 → 미리보기
         </div>
       </div>
 
@@ -766,6 +782,10 @@
     let calMonth = (new Date()).getMonth()+1;
     let selectedMonday = null;
 
+    // ✅ 미리보기 상태
+    let previewMonday = null;
+    let titleBackupBeforePreview = null;
+
     // cell edit state
     let editingCell = { r:null, c:null };
 
@@ -851,7 +871,7 @@
       plannerTitleText.textContent = getTitle();
     }
 
-    // title modal open/close
+    // title modal
     function openTitleModal(){
       titleInput.value = (localStorage.getItem(K.title) || "").trim();
       titleBackdrop.style.display="flex";
@@ -895,10 +915,38 @@
 
     // ===== calendar =====
     function openCal(){
+      // ✅ 현재 화면 상태 백업(적용 안 하고 닫으면 원복)
+      titleBackupBeforePreview = {
+        meta: plannerMetaText.textContent,
+        dates: Array.from(document.querySelectorAll(".date[data-dow]")).map(el => el.textContent),
+        noDate: plannerTable.classList.contains("no-date")
+      };
+      previewMonday = null;
+
       calBackdrop.style.display="flex";
       renderCalendar(calYear, calMonth);
     }
-    function closeCalModal(){ calBackdrop.style.display="none"; }
+    function closeCalModal(){
+      calBackdrop.style.display="none";
+
+      // ✅ 적용 안 하고 닫으면 미리보기 원복
+      if (previewMonday && titleBackupBeforePreview){
+        if (titleBackupBeforePreview.noDate){
+          clearHeaderDates();
+          plannerTable.classList.add("no-date");
+        } else {
+          plannerTable.classList.remove("no-date");
+          const dates = titleBackupBeforePreview.dates || [];
+          document.querySelectorAll(".date[data-dow]").forEach((el, idx)=>{
+            el.textContent = dates[idx] || "";
+          });
+          plannerMetaText.textContent = titleBackupBeforePreview.meta || "";
+        }
+      }
+
+      previewMonday = null;
+      titleBackupBeforePreview = null;
+    }
 
     function renderCalendar(year, month1to12){
       calLabel.textContent = `${year}년 ${month1to12}월`;
@@ -906,7 +954,6 @@
 
       const startMon = getMonthWeek1Monday(year, month1to12);
       calWeeks.innerHTML = "";
-      mwBadge.textContent = "주를 선택해줘";
 
       for(let w=1; w<=weekCount; w++){
         const monday = new Date(startMon);
@@ -927,18 +974,34 @@
           weekEl.appendChild(cell);
         }
 
-        if(selectedMonday && getMondayFromDate(selectedMonday).getTime() === monday.getTime()){
-          weekEl.style.outline = `3px solid color-mix(in srgb, var(--border) 60%, #fff 40%)`;
-          weekEl.style.borderRadius = "10px";
-          mwBadge.textContent = `선택: ${year}년 ${month1to12}월 ${w}주`;
+        // 선택 표시(미리보기 포함)
+        const chosen = previewMonday ? previewMonday : (selectedMonday ? getMondayFromDate(selectedMonday) : null);
+        if(chosen && chosen.getTime() === monday.getTime()){
+          weekEl.classList.add("selected");
         }
 
         weekEl.addEventListener("click", ()=>{
           selectedMonday = new Date(weekEl.dataset.monday);
+          previewMonday = getMondayFromDate(selectedMonday);
+
+          // ✅ 미리보기: 적용 버튼 누르기 전에도 표에 반영
+          applyWeekMonday(previewMonday);
+
+          const start = new Date(previewMonday);
+          const end = new Date(previewMonday); end.setDate(previewMonday.getDate()+6);
+          const wNo = monthWeekNoFromMonday(year, month1to12, previewMonday);
+
+          mwBadge.textContent = `미리보기: ${year}년 ${month1to12}월 ${wNo}주 · ${fmtKoreanDate(start)} ~ ${fmtKoreanDate(end)} ✅`;
+
           renderCalendar(year, month1to12);
         });
 
         calWeeks.appendChild(weekEl);
+      }
+
+      // 아무것도 안 고른 상태 안내
+      if(!previewMonday && !selectedMonday){
+        mwBadge.textContent = "주를 클릭하면 미리보기 적용";
       }
     }
 
@@ -965,10 +1028,10 @@
         return;
       }
 
-      const monday = getMondayFromDate(selectedMonday);
+      const monday = previewMonday ? previewMonday : getMondayFromDate(selectedMonday);
       const w = monthWeekNoFromMonday(calYear, calMonth, monday);
-      localStorage.setItem(K.mw, `${calYear}-${pad2(calMonth)}-W${w}`);
 
+      localStorage.setItem(K.mw, `${calYear}-${pad2(calMonth)}-W${w}`);
       applyWeekMonday(monday);
 
       const storedTitle = (localStorage.getItem(K.title) || "").trim();
@@ -981,6 +1044,10 @@
         const auto = `${calMonth}월 ${w}주 플래너(${fmtKoreanDate(start)} ~ ${fmtKoreanDate(end)})`;
         setTitle(auto, true);
       }
+
+      // ✅ 적용했으니 원복 로직 막기
+      previewMonday = null;
+      titleBackupBeforePreview = null;
 
       closeCalModal();
     });
@@ -1007,25 +1074,26 @@
         return;
       }
 
-      // ✅ 날짜 연동을 켤 때마다 주 선택을 다시 하게(요청 반영)
+      // ✅ 날짜연동 켤 때마다 주 선택 강제
       if(forcePick){
         selectedMonday = null;
+        previewMonday = null;
         openCal();
         return;
       }
 
-      // (초기 로드용) 저장값이 있으면 적용
+      // 초기 로드용: 저장값 있으면 적용
       const saved = localStorage.getItem(K.mw);
       if(saved){
         const [sy, sm, sw] = saved.split("-");
         calYear = Number(sy);
         calMonth = Number(sm);
         const w = Number(sw.replace("W",""));
-        const monday = getMonthWeek1Monday(calYear, calMonth);
-        const selected = new Date(monday);
-        selected.setDate(monday.getDate() + (w-1)*7);
-        selectedMonday = selected;
-        applyWeekMonday(getMondayFromDate(selectedMonday));
+        const week1 = getMonthWeek1Monday(calYear, calMonth);
+        const monday = new Date(week1);
+        monday.setDate(week1.getDate() + (w-1)*7);
+        selectedMonday = monday;
+        applyWeekMonday(monday);
       }else{
         openCal();
       }
@@ -1033,17 +1101,11 @@
 
     dateSwitch.addEventListener("click", ()=>{
       const next = !dateLinkToggle.checked;
-      // ✅ OFF→ON일 때마다 강제 주 선택
       enableDateLink(next, next === true);
     });
 
     pickWeekBtn.addEventListener("click", ()=>{
-      if(!dateLinkToggle.checked){
-        enableDateLink(true, true);
-      }else{
-        // 켜져있어도 주 다시 고르기
-        enableDateLink(true, true);
-      }
+      enableDateLink(true, true);
     });
 
     // ===== orientation =====
@@ -1146,6 +1208,14 @@
       cellInput.focus();
     });
 
+    // ✅ 팝업 입력 단축키: Enter=줄바꿈(기본), Ctrl+Enter(또는 ⌘+Enter)=저장
+    cellInput.addEventListener("keydown", (e)=>{
+      if((e.ctrlKey || e.metaKey) && e.key === "Enter"){
+        e.preventDefault();
+        saveCellBtn.click();
+      }
+    });
+
     // ===== export/import =====
     exportBtn.addEventListener("click", ()=>{
       const ok = confirm("현재 내용을 JSON으로 내보낼까?");
@@ -1153,7 +1223,7 @@
 
       const payload = {
         app:"pasteltone-weekly-planner",
-        version: 8,
+        version: 9,
         exportedAt: new Date().toISOString(),
         settings:{
           title: localStorage.getItem(K.title) || "",
@@ -1215,7 +1285,6 @@
         initOrientation();
         applyTitleToUI();
 
-        // 날짜연동 상태 반영(로드용은 forcePick=false)
         enableDateLink(localStorage.getItem(K.dateOn)==="1", false);
 
         loadAllCells();
