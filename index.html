@@ -25,7 +25,10 @@
       --rowH:36px;
 
       --paper: portrait; /* portrait | landscape */
-      --printMargin: 5mm; /* ✅ 모바일 01:00 넘어감 방지로 조금 더 타이트하게 */
+      --printMargin: 5mm;
+
+      --sel:#111;
+      --selGlow: color-mix(in srgb, var(--border) 55%, transparent 45%);
     }
 
     *{ box-sizing:border-box; }
@@ -156,7 +159,6 @@
       margin-bottom: 10px;
     }
 
-    /* ✅ 둥근 직사각형 제목 박스 */
     .titleBox{
       display:inline-flex;
       align-items:center;
@@ -213,7 +215,6 @@
       font-size: 14px;
     }
 
-    /* ✅ 오른쪽 끝 세로선 강제 */
     .planner tr > *:last-child{
       border-right: 1px solid var(--border) !important;
     }
@@ -298,14 +299,16 @@
     .sat .name, .sat .date{ color: var(--sat); opacity: .95; }
     .sun .name, .sun .date{ color: var(--sun); opacity: .95; }
 
-    /* ✅ 셀: 팝업 입력 */
+    /* ✅ 셀: 기본은 "맨 윗줄(핵심)"만 보이게 + 길면 ... */
     .planner td.cell{
       cursor: pointer;
       text-align: left;
       padding: 6px 8px;
-      white-space: pre-wrap;
-      word-break: break-word;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       background: #fff;
+      position: relative;
     }
     .planner td.cell:hover{
       background: color-mix(in srgb, var(--header) 18%, white 82%);
@@ -313,6 +316,63 @@
     .planner td.cell.empty::before{
       content: "클릭해서 입력";
       opacity: .25;
+    }
+
+    /* 펼치기(옵션): 더블탭/화살표로 토글 */
+    .planner td.cell.expanded{
+      white-space: pre-wrap;
+      overflow: visible;
+      text-overflow: clip;
+    }
+    .expander{
+      position:absolute;
+      right: 6px;
+      bottom: 6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 8px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      opacity:.92;
+    }
+    .planner td.cell.hasMore .expander{ display:flex; }
+    .planner td.cell.hasMore:not(.expanded) .expander::before{ content:"▾"; }
+    .planner td.cell.hasMore.expanded .expander::before{ content:"▴"; }
+
+    /* 선택된 셀(키보드/조이스틱 이동) */
+    .planner td.cell.selected{
+      outline: 2px solid var(--sel);
+      outline-offset: -2px;
+      box-shadow: 0 0 0 4px var(--selGlow) inset;
+    }
+
+    /* ===== tooltip preview ===== */
+    .tooltip{
+      position: fixed;
+      z-index: 9999;
+      max-width: min(520px, calc(100vw - 28px));
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 14px 45px rgba(0,0,0,.22);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-weight: 900;
+      font-size: 13px;
+      display:none;
+      pointer-events:none;
+    }
+    .tooltip .meta{
+      font-size: 11px;
+      opacity:.7;
+      font-weight: 1000;
+      margin-bottom: 6px;
     }
 
     /* ===== modal common ===== */
@@ -382,6 +442,7 @@
       font-size: 14px;
       line-height: 1.4;
       outline: none;
+      font-weight: 900;
     }
     textarea{ min-height: 120px; resize: vertical; }
     textarea:focus, input[type="text"]:focus{
@@ -401,6 +462,7 @@
       display:flex;
       gap:8px;
       align-items:center;
+      flex-wrap: wrap;
     }
     .cal-grid{
       width: 100%;
@@ -459,7 +521,72 @@
     .cal-cell.sat{ color: var(--sat); }
     .cal-cell.sun{ color: var(--sun); }
 
-    /* ===== PRINT (fast) ===== */
+    /* ===== mobile joystick ===== */
+    .joy-fab{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 80;
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: #fff;
+      box-shadow: 0 18px 45px rgba(0,0,0,.22);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+      cursor:pointer;
+      user-select:none;
+    }
+    .joy-fab::before{ content:"⌖"; font-size: 18px; }
+    .joy-pad{
+      position: fixed;
+      right: 14px;
+      bottom: 74px;
+      z-index: 80;
+      width: 170px;
+      padding: 10px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, #fff 85%, var(--bg) 15%);
+      box-shadow: 0 18px 45px rgba(0,0,0,.22);
+      display:none;
+    }
+    .joy-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      align-items:center;
+      justify-items:center;
+    }
+    .joy-btn{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 1000;
+      cursor:pointer;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .joy-btn:active{ transform: scale(.98); }
+    .joy-close{
+      margin-top: 8px;
+      width: 100%;
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px dashed var(--border);
+      background: transparent;
+      font-weight: 1000;
+      cursor:pointer;
+    }
+
+    /* ===== PRINT ===== */
     @media print{
       body{
         background:#fff;
@@ -471,7 +598,7 @@
         margin: var(--printMargin);
       }
 
-      .appbar{ display:none !important; }
+      .appbar, .tooltip, .joy-fab, .joy-pad{ display:none !important; }
       .wrap{ max-width: none; padding: 0; margin: 0; }
       .card{ border:none; border-radius:0; padding:0; background:#fff; }
 
@@ -490,7 +617,6 @@
         position: static !important;
       }
 
-      /* ✅ 모바일에서 01:00만 넘어가는 문제 방지(더 타이트) */
       html[data-paper="portrait"]{ --rowH: 26px; }
       html[data-paper="landscape"]{ --rowH: 22px; }
 
@@ -500,10 +626,20 @@
       }
       .dow .date{ font-size: 10px !important; }
       .cornerTime, .cornerDay{ font-size: 12px !important; }
+
+      /* 인쇄는 한 줄만(핵심) */
+      .planner td.cell{
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+      .expander{ display:none !important; }
+      .planner td.cell.selected{ outline: none !important; box-shadow:none !important; }
     }
 
     @media (max-width: 520px){
       .hint{ display:none; }
+      .joy-fab{ display:flex; } /* 모바일에서 조이스틱 버튼 */
     }
   </style>
 </head>
@@ -513,7 +649,7 @@
     <div class="appbar-inner">
       <div class="left">
         <div class="brand">파스텔톤 주간 플래너</div>
-        <div class="hint">칸 클릭 → 팝업 입력 · Ctrl+Enter 저장</div>
+        <div class="hint">Ctrl+Enter 저장 · 방향키로 이동 · 모바일은 ⌖</div>
 
         <button class="btn" id="noticeBtn" type="button">공지</button>
 
@@ -534,6 +670,12 @@
         </label>
 
         <button class="btn" id="pickWeekBtn" type="button">주 선택</button>
+
+        <label class="switch" id="backupSwitch" title="자동 백업(1분마다 저장, 5분 지난 건 자동 삭제)">
+          <span class="track"><span class="knob"></span></span>
+          <span>자동 백업</span>
+          <input type="checkbox" id="backupToggle" />
+        </label>
       </div>
 
       <div class="right">
@@ -595,13 +737,38 @@
     </div>
   </main>
 
+  <!-- tooltip (hover/long-press preview) -->
+  <div class="tooltip" id="tooltip">
+    <div class="meta" id="tooltipMeta"></div>
+    <div id="tooltipBody"></div>
+  </div>
+
+  <!-- mobile joystick -->
+  <div class="joy-fab" id="joyFab" title="셀 선택 조이스틱"></div>
+  <div class="joy-pad" id="joyPad" aria-label="조이스틱">
+    <div class="joy-grid">
+      <div></div>
+      <div class="joy-btn" data-dir="up">▲</div>
+      <div></div>
+
+      <div class="joy-btn" data-dir="left">◀</div>
+      <div class="joy-btn" data-dir="enter">⏎</div>
+      <div class="joy-btn" data-dir="right">▶</div>
+
+      <div></div>
+      <div class="joy-btn" data-dir="down">▼</div>
+      <div></div>
+    </div>
+    <button class="joy-close" id="joyClose" type="button">닫기</button>
+  </div>
+
   <!-- ===== 셀 입력 모달 ===== -->
   <div class="backdrop" id="cellBackdrop" aria-modal="true" role="dialog">
     <div class="modal">
       <div class="modal-header">
         <div class="modal-title">
           <span class="pill">내용 입력</span>
-          <span class="pill soft" id="cellHotkey">Enter=줄바꿈 · Ctrl+Enter=저장</span>
+          <span class="pill soft">Enter=줄바꿈 · Ctrl+Enter=저장</span>
           <span class="pill" id="cellLabel"></span>
         </div>
         <button class="btn" id="closeCell" type="button">닫기</button>
@@ -652,9 +819,10 @@
           <div class="nav">
             <button class="btn" id="calPrev" type="button">◀</button>
             <button class="btn" id="calToday" type="button">이번 달</button>
+            <button class="btn" id="calThisWeek" type="button">이번 주</button>
             <button class="btn" id="calNext" type="button">▶</button>
           </div>
-          <span class="pill soft" id="mwBadge">주를 클릭하면 미리보기 적용</span>
+          <span class="pill soft" id="mwBadge">이번 주가 자동 선택됨</span>
         </div>
 
         <div class="cal-grid">
@@ -671,7 +839,8 @@
       </div>
 
       <div class="modal-actions">
-        <button class="btn" id="applyCal" type="button">선택 적용</button>
+        <button class="btn ghost" id="cancelCal" type="button">취소</button>
+        <button class="btn" id="applyCal" type="button">적용</button>
       </div>
     </div>
   </div>
@@ -709,7 +878,9 @@
       dateOn: "planner_date_link_enabled",
       mw: "planner_monthweek",
       ori: "planner_print_orientation",
-      theme: "planner_theme"
+      theme: "planner_theme",
+      backupOn: "planner_backup_enabled",
+      backups: "planner_backups" // array of {ts:number, payload:string}
     };
 
     const THEMES = {
@@ -731,6 +902,9 @@
     const dateSwitch = document.getElementById("dateSwitch");
     const pickWeekBtn = document.getElementById("pickWeekBtn");
 
+    const backupToggle = document.getElementById("backupToggle");
+    const backupSwitch = document.getElementById("backupSwitch");
+
     const orientationSelect = document.getElementById("orientationSelect");
     const printBtn = document.getElementById("printBtn");
 
@@ -744,6 +918,16 @@
     const titleBox = document.getElementById("titleBox");
     const plannerTitleText = document.getElementById("plannerTitleText");
     const plannerMetaText  = document.getElementById("plannerMetaText");
+
+    // tooltip
+    const tooltip = document.getElementById("tooltip");
+    const tooltipMeta = document.getElementById("tooltipMeta");
+    const tooltipBody = document.getElementById("tooltipBody");
+
+    // joystick
+    const joyFab = document.getElementById("joyFab");
+    const joyPad = document.getElementById("joyPad");
+    const joyClose = document.getElementById("joyClose");
 
     // cell modal
     const cellBackdrop = document.getElementById("cellBackdrop");
@@ -766,8 +950,10 @@
     const calPrev = document.getElementById("calPrev");
     const calNext = document.getElementById("calNext");
     const calToday = document.getElementById("calToday");
+    const calThisWeek = document.getElementById("calThisWeek");
     const calWeeks = document.getElementById("calWeeks");
     const closeCal = document.getElementById("closeCal");
+    const cancelCal = document.getElementById("cancelCal");
     const applyCal = document.getElementById("applyCal");
     const mwBadge = document.getElementById("mwBadge");
 
@@ -782,12 +968,23 @@
     let calMonth = (new Date()).getMonth()+1;
     let selectedMonday = null;
 
-    // ✅ 미리보기 상태
+    // preview state
     let previewMonday = null;
     let titleBackupBeforePreview = null;
 
     // cell edit state
     let editingCell = { r:null, c:null };
+
+    // selected cell for nav
+    let selectedRC = { r: 0, c: 0 };
+    let lastPointerDownTS = 0;
+
+    // long-press preview
+    let longPressTimer = null;
+    let longPressActive = false;
+
+    // backup timer
+    let backupIntervalId = null;
 
     const pad2 = n => String(n).padStart(2,"0");
     const cellId = (r,c) => `${r}-${c}`;
@@ -913,15 +1110,65 @@
       plannerMetaText.textContent = `기간: ${fmtKoreanDate(start)} ~ ${fmtKoreanDate(end)}`;
     }
 
+    // ===== tooltip =====
+    function hideTooltip(){
+      tooltip.style.display = "none";
+      longPressActive = false;
+    }
+    function showTooltipForCell(td, x, y){
+      const full = td?.dataset?.full || "";
+      if(!full || !full.trim()) return;
+
+      tooltipMeta.textContent = `${times[Number(td.dataset.r)]} · ${days[Number(td.dataset.c)]}`;
+      tooltipBody.textContent = full;
+
+      tooltip.style.display = "block";
+
+      const rect = tooltip.getBoundingClientRect();
+      const pad = 10;
+      let left = x + 12;
+      let top  = y + 12;
+
+      if(left + rect.width > window.innerWidth - pad) left = window.innerWidth - pad - rect.width;
+      if(top + rect.height > window.innerHeight - pad) top = window.innerHeight - pad - rect.height;
+      if(left < pad) left = pad;
+      if(top < pad) top = pad;
+
+      tooltip.style.left = left + "px";
+      tooltip.style.top  = top + "px";
+    }
+
     // ===== calendar =====
+    function applyPreviewBadge(year, month1to12, monday){
+      const start = new Date(monday);
+      const end = new Date(monday); end.setDate(monday.getDate()+6);
+      const wNo = monthWeekNoFromMonday(year, month1to12, monday);
+      mwBadge.textContent = `미리보기: ${year}년 ${month1to12}월 ${wNo}주 · ${fmtKoreanDate(start)} ~ ${fmtKoreanDate(end)} ✅`;
+    }
+
+    function autoSelectThisWeek(){
+      const now = new Date();
+      const monday = getMondayFromDate(now);
+      selectedMonday = monday;
+      previewMonday = monday;
+      calYear = now.getFullYear();
+      calMonth = now.getMonth()+1;
+
+      // 미리보기 즉시 반영
+      applyWeekMonday(monday);
+      applyPreviewBadge(calYear, calMonth, monday);
+    }
+
     function openCal(){
-      // ✅ 현재 화면 상태 백업(적용 안 하고 닫으면 원복)
+      // 현재 상태 백업(적용 안 하고 닫으면 원복)
       titleBackupBeforePreview = {
         meta: plannerMetaText.textContent,
         dates: Array.from(document.querySelectorAll(".date[data-dow]")).map(el => el.textContent),
         noDate: plannerTable.classList.contains("no-date")
       };
-      previewMonday = null;
+
+      // ✅ 열자마자 "이번 주" 자동 선택 + 미리보기
+      autoSelectThisWeek();
 
       calBackdrop.style.display="flex";
       renderCalendar(calYear, calMonth);
@@ -929,7 +1176,7 @@
     function closeCalModal(){
       calBackdrop.style.display="none";
 
-      // ✅ 적용 안 하고 닫으면 미리보기 원복
+      // 적용 안 하고 닫으면 미리보기 원복
       if (previewMonday && titleBackupBeforePreview){
         if (titleBackupBeforePreview.noDate){
           clearHeaderDates();
@@ -974,7 +1221,6 @@
           weekEl.appendChild(cell);
         }
 
-        // 선택 표시(미리보기 포함)
         const chosen = previewMonday ? previewMonday : (selectedMonday ? getMondayFromDate(selectedMonday) : null);
         if(chosen && chosen.getTime() === monday.getTime()){
           weekEl.classList.add("selected");
@@ -984,24 +1230,13 @@
           selectedMonday = new Date(weekEl.dataset.monday);
           previewMonday = getMondayFromDate(selectedMonday);
 
-          // ✅ 미리보기: 적용 버튼 누르기 전에도 표에 반영
           applyWeekMonday(previewMonday);
-
-          const start = new Date(previewMonday);
-          const end = new Date(previewMonday); end.setDate(previewMonday.getDate()+6);
-          const wNo = monthWeekNoFromMonday(year, month1to12, previewMonday);
-
-          mwBadge.textContent = `미리보기: ${year}년 ${month1to12}월 ${wNo}주 · ${fmtKoreanDate(start)} ~ ${fmtKoreanDate(end)} ✅`;
+          applyPreviewBadge(year, month1to12, previewMonday);
 
           renderCalendar(year, month1to12);
         });
 
         calWeeks.appendChild(weekEl);
-      }
-
-      // 아무것도 안 고른 상태 안내
-      if(!previewMonday && !selectedMonday){
-        mwBadge.textContent = "주를 클릭하면 미리보기 적용";
       }
     }
 
@@ -1019,6 +1254,10 @@
       const now = new Date();
       calYear = now.getFullYear();
       calMonth = now.getMonth()+1;
+      renderCalendar(calYear, calMonth);
+    });
+    calThisWeek.addEventListener("click", ()=>{
+      autoSelectThisWeek();
       renderCalendar(calYear, calMonth);
     });
 
@@ -1045,14 +1284,13 @@
         setTitle(auto, true);
       }
 
-      // ✅ 적용했으니 원복 로직 막기
       previewMonday = null;
       titleBackupBeforePreview = null;
-
       closeCalModal();
     });
 
     closeCal.addEventListener("click", closeCalModal);
+    cancelCal.addEventListener("click", closeCalModal);
     calBackdrop.addEventListener("click", (e)=>{ if(e.target===calBackdrop) closeCalModal(); });
 
     // ===== date link toggle =====
@@ -1066,7 +1304,6 @@
       if(!enable){
         clearHeaderDates();
 
-        // 자동제목이었으면 제목도 기본으로
         const wasAuto = localStorage.getItem(K.titleAuto) === "1";
         const storedTitle = (localStorage.getItem(K.title) || "").trim();
         if(wasAuto && storedTitle.length > 0) clearTitle();
@@ -1074,7 +1311,6 @@
         return;
       }
 
-      // ✅ 날짜연동 켤 때마다 주 선택 강제
       if(forcePick){
         selectedMonday = null;
         previewMonday = null;
@@ -1082,7 +1318,6 @@
         return;
       }
 
-      // 초기 로드용: 저장값 있으면 적용
       const saved = localStorage.getItem(K.mw);
       if(saved){
         const [sy, sm, sw] = saved.split("-");
@@ -1141,15 +1376,49 @@
         <tr>
           <td class="time">${t}</td>
           ${Array.from({length:7}).map((_, c)=>
-            `<td class="cell empty" data-r="${r}" data-c="${c}"></td>`
+            `<td class="cell empty" data-r="${r}" data-c="${c}">
+               <span class="expander" data-action="toggle"></span>
+             </td>`
           ).join("")}
         </tr>
       `).join("");
     }
 
-    function updateCellDisplay(td, value){
-      td.textContent = value || "";
-      td.classList.toggle("empty", !value || value.trim()==="");
+    function normalizeDisplay(full){
+      const text = (full || "").replace(/\r/g,"");
+      const firstLine = text.split("\n")[0] || "";
+      const more = text.includes("\n") || firstLine.length > 18;
+      // 표시 텍스트는 첫 줄만, 길면 ellipsis는 CSS가 처리
+      return { firstLine: firstLine.trim(), hasMore: more };
+    }
+
+    function updateCellDisplay(td, fullValue){
+      const full = (fullValue || "");
+      td.dataset.full = full;
+
+      if(!full.trim()){
+        td.textContent = "";
+        td.classList.add("empty");
+        td.classList.remove("hasMore","expanded");
+        td.innerHTML = `<span class="expander" data-action="toggle"></span>`;
+        return;
+      }
+
+      const { firstLine, hasMore } = normalizeDisplay(full);
+
+      td.classList.remove("empty");
+      td.classList.toggle("hasMore", hasMore);
+
+      // expanded면 full, 아니면 firstLine만
+      const show = td.classList.contains("expanded") ? full : firstLine;
+
+      // HTML 안전하게
+      td.textContent = show;
+      // expander 다시 붙이기
+      const ex = document.createElement("span");
+      ex.className = "expander";
+      ex.dataset.action = "toggle";
+      td.appendChild(ex);
     }
 
     function loadAllCells(){
@@ -1175,21 +1444,28 @@
       editingCell = { r:null, c:null };
     }
 
-    rowsEl.addEventListener("click", (e)=>{
-      const td = e.target.closest("td.cell");
-      if(!td) return;
-      openCellModal(Number(td.dataset.r), Number(td.dataset.c));
-    });
+    // select cell highlight
+    function clearSelectedCell(){
+      document.querySelectorAll("td.cell.selected").forEach(td=>td.classList.remove("selected"));
+    }
+    function selectCell(r, c, scrollInto=true){
+      r = Math.max(0, Math.min(times.length-1, r));
+      c = Math.max(0, Math.min(6, c));
+      selectedRC = { r, c };
 
-    closeCell.addEventListener("click", closeCellModal);
-    cellBackdrop.addEventListener("click", (e)=>{ if(e.target===cellBackdrop) closeCellModal(); });
+      clearSelectedCell();
+      const td = document.querySelector(`td.cell[data-r="${r}"][data-c="${c}"]`);
+      if(td){
+        td.classList.add("selected");
+        if(scrollInto){
+          td.scrollIntoView({block:"nearest", inline:"nearest"});
+        }
+      }
+    }
 
-    saveCellBtn.addEventListener("click", ()=>{
-      const {r,c} = editingCell;
-      if(r==null || c==null) return;
-
+    function saveCellValue(r, c, value){
       const data = getData();
-      const v = (cellInput.value || "").replace(/\s+$/,"");
+      const v = (value || "").replace(/\s+$/,"");
       const id = cellId(r,c);
 
       if(v.trim()==="") delete data[id];
@@ -1199,21 +1475,134 @@
 
       const td = document.querySelector(`td.cell[data-r="${r}"][data-c="${c}"]`);
       if(td) updateCellDisplay(td, data[id] || "");
+    }
 
+    // click handlers on table
+    rowsEl.addEventListener("click", (e)=>{
+      const td = e.target.closest("td.cell");
+      if(!td) return;
+
+      // expander toggle
+      const ex = e.target.closest(".expander");
+      if(ex && td.classList.contains("hasMore")){
+        td.classList.toggle("expanded");
+        updateCellDisplay(td, td.dataset.full || "");
+        return;
+      }
+
+      // normal click -> select + open input popup
+      const r = Number(td.dataset.r), c = Number(td.dataset.c);
+      selectCell(r, c, false);
+      openCellModal(r, c);
+    });
+
+    // mouse hover preview (PC)
+    rowsEl.addEventListener("mousemove", (e)=>{
+      const td = e.target.closest("td.cell");
+      if(!td) return;
+      if(!td.dataset.full || !td.dataset.full.trim()) return;
+      // only show tooltip when content is not fully visible (hasMore) OR expanded has long content
+      if(td.classList.contains("hasMore") || (td.dataset.full && td.dataset.full.length > 30)){
+        showTooltipForCell(td, e.clientX, e.clientY);
+      }
+    });
+    rowsEl.addEventListener("mouseleave", ()=> hideTooltip());
+
+    // mobile long-press preview (touch)
+    function startLongPress(td, x, y){
+      if(!td || !td.dataset.full || !td.dataset.full.trim()) return;
+      longPressTimer = setTimeout(()=>{
+        longPressActive = true;
+        showTooltipForCell(td, x, y);
+      }, 420);
+    }
+    function cancelLongPress(){
+      if(longPressTimer){ clearTimeout(longPressTimer); longPressTimer = null; }
+      if(longPressActive) hideTooltip();
+    }
+
+    rowsEl.addEventListener("touchstart", (e)=>{
+      const td = e.target.closest("td.cell");
+      if(!td) return;
+
+      // expander touch -> don't long-press
+      if(e.target.closest(".expander")) return;
+
+      const t = e.touches[0];
+      startLongPress(td, t.clientX, t.clientY);
+    }, {passive:true});
+
+    rowsEl.addEventListener("touchmove", ()=> cancelLongPress(), {passive:true});
+    rowsEl.addEventListener("touchend", ()=> cancelLongPress(), {passive:true});
+    rowsEl.addEventListener("touchcancel", ()=> cancelLongPress(), {passive:true});
+
+    // cell modal events
+    closeCell.addEventListener("click", closeCellModal);
+    cellBackdrop.addEventListener("click", (e)=>{ if(e.target===cellBackdrop) closeCellModal(); });
+
+    saveCellBtn.addEventListener("click", ()=>{
+      const {r,c} = editingCell;
+      if(r==null || c==null) return;
+      saveCellValue(r, c, cellInput.value);
       closeCellModal();
     });
 
+    // ✅ 비우기 = 즉시 저장 + 닫기
     clearCellBtn.addEventListener("click", ()=>{
-      cellInput.value = "";
-      cellInput.focus();
+      const {r,c} = editingCell;
+      if(r==null || c==null) return;
+      saveCellValue(r, c, "");
+      closeCellModal();
     });
 
-    // ✅ 팝업 입력 단축키: Enter=줄바꿈(기본), Ctrl+Enter(또는 ⌘+Enter)=저장
+    // Ctrl+Enter save
     cellInput.addEventListener("keydown", (e)=>{
       if((e.ctrlKey || e.metaKey) && e.key === "Enter"){
         e.preventDefault();
         saveCellBtn.click();
       }
+    });
+
+    // ===== keyboard nav (Excel-like) =====
+    document.addEventListener("keydown", (e)=>{
+      // ignore when typing in inputs
+      const tag = (document.activeElement?.tagName || "").toLowerCase();
+      if(tag === "textarea" || tag === "input") return;
+
+      if(e.key === "ArrowUp"){ e.preventDefault(); selectCell(selectedRC.r-1, selectedRC.c); }
+      else if(e.key === "ArrowDown"){ e.preventDefault(); selectCell(selectedRC.r+1, selectedRC.c); }
+      else if(e.key === "ArrowLeft"){ e.preventDefault(); selectCell(selectedRC.r, selectedRC.c-1); }
+      else if(e.key === "ArrowRight"){ e.preventDefault(); selectCell(selectedRC.r, selectedRC.c+1); }
+      else if(e.key === "Enter"){
+        e.preventDefault();
+        openCellModal(selectedRC.r, selectedRC.c);
+      }
+      else if(e.key === " "){
+        // space toggles expand/collapse (if hasMore)
+        const td = document.querySelector(`td.cell[data-r="${selectedRC.r}"][data-c="${selectedRC.c}"]`);
+        if(td && td.classList.contains("hasMore")){
+          e.preventDefault();
+          td.classList.toggle("expanded");
+          updateCellDisplay(td, td.dataset.full || "");
+        }
+      }
+    });
+
+    // ===== joystick =====
+    joyFab.addEventListener("click", ()=>{
+      joyPad.style.display = (joyPad.style.display === "block") ? "none" : "block";
+    });
+    joyClose.addEventListener("click", ()=> joyPad.style.display="none");
+
+    joyPad.addEventListener("click", (e)=>{
+      const btn = e.target.closest(".joy-btn");
+      if(!btn) return;
+      const dir = btn.dataset.dir;
+      if(dir === "up") selectCell(selectedRC.r-1, selectedRC.c);
+      if(dir === "down") selectCell(selectedRC.r+1, selectedRC.c);
+      if(dir === "left") selectCell(selectedRC.r, selectedRC.c-1);
+      if(dir === "right") selectCell(selectedRC.r, selectedRC.c+1);
+      if(dir === "enter") openCellModal(selectedRC.r, selectedRC.c);
     });
 
     // ===== export/import =====
@@ -1223,7 +1612,7 @@
 
       const payload = {
         app:"pasteltone-weekly-planner",
-        version: 9,
+        version: 12,
         exportedAt: new Date().toISOString(),
         settings:{
           title: localStorage.getItem(K.title) || "",
@@ -1231,7 +1620,8 @@
           dateOn: localStorage.getItem(K.dateOn) || "0",
           monthWeek: localStorage.getItem(K.mw) || "",
           orientation: localStorage.getItem(K.ori) || "portrait",
-          theme: localStorage.getItem(K.theme) || "lblue"
+          theme: localStorage.getItem(K.theme) || "lblue",
+          backupOn: localStorage.getItem(K.backupOn) || "0"
         },
         data: getData()
       };
@@ -1279,11 +1669,13 @@
           localStorage.setItem(K.mw, json.settings.monthWeek || "");
           localStorage.setItem(K.ori, json.settings.orientation || "portrait");
           localStorage.setItem(K.theme, json.settings.theme || "lblue");
+          localStorage.setItem(K.backupOn, json.settings.backupOn || "0");
         }
 
         initTheme();
         initOrientation();
         applyTitleToUI();
+        initBackupToggle();
 
         enableDateLink(localStorage.getItem(K.dateOn)==="1", false);
 
@@ -1296,33 +1688,142 @@
 
     // ===== reset =====
     resetSizeBtn.addEventListener("click", ()=>{
-      alert("현재 버전은 크기 조절 기능이 없고(요청사항 반영 중), 인쇄 1장 고정이 우선 적용되어 있어!");
+      alert("현재 버전은 크기 조절 기능은 다음 단계에서 더 정교하게 넣을 예정이야!");
     });
 
     resetAllBtn.addEventListener("click", ()=>{
       const ok = confirm("⚠️ 전체 초기화하면 입력한 내용/설정이 모두 삭제돼.\n정말 초기화할까?");
       if(!ok) return;
+
       Object.values(K).forEach(key => localStorage.removeItem(key));
       initTheme();
       initOrientation();
+      initBackupToggle(true);
       applyTitleToUI();
       enableDateLink(false, false);
       loadAllCells();
+      selectCell(0,0,false);
       alert("전체 초기화 완료!");
     });
 
+    // ===== date link toggle =====
+    // (already defined above) - wire button
+    // pickWeekBtn is hidden when OFF
+    pickWeekBtn.style.display = "none";
+
+    // ===== backup (1분마다 저장, 5분 지난 건 자동 삭제, 켜고 끄기) =====
+    function readBackups(){
+      try{ return JSON.parse(localStorage.getItem(K.backups) || "[]"); }
+      catch{ return []; }
+    }
+    function writeBackups(list){
+      localStorage.setItem(K.backups, JSON.stringify(list));
+    }
+    function cleanupBackups(){
+      const now = Date.now();
+      const ttl = 5 * 60 * 1000; // 5분
+      const list = readBackups().filter(b => b && typeof b.ts === "number" && (now - b.ts) <= ttl);
+      writeBackups(list);
+    }
+    function makeSnapshot(){
+      const payload = {
+        ts: Date.now(),
+        settings:{
+          title: localStorage.getItem(K.title) || "",
+          titleAuto: localStorage.getItem(K.titleAuto) || "0",
+          dateOn: localStorage.getItem(K.dateOn) || "0",
+          monthWeek: localStorage.getItem(K.mw) || "",
+          orientation: localStorage.getItem(K.ori) || "portrait",
+          theme: localStorage.getItem(K.theme) || "lblue"
+        },
+        data: getData()
+      };
+      return payload;
+    }
+    function doBackupTick(){
+      cleanupBackups();
+      const list = readBackups();
+      list.push(makeSnapshot());
+      writeBackups(list);
+      cleanupBackups();
+    }
+    function startBackup(){
+      stopBackup();
+      doBackupTick(); // 켜자마자 1회
+      backupIntervalId = setInterval(doBackupTick, 60 * 1000);
+    }
+    function stopBackup(){
+      if(backupIntervalId){
+        clearInterval(backupIntervalId);
+        backupIntervalId = null;
+      }
+    }
+    function setBackupEnabled(on){
+      backupToggle.checked = on;
+      setSwitchVisual(backupSwitch, on);
+      localStorage.setItem(K.backupOn, on ? "1":"0");
+      if(on) startBackup(); else stopBackup();
+      if(!on) cleanupBackups();
+    }
+    function initBackupToggle(forceOff=false){
+      const saved = forceOff ? "0" : (localStorage.getItem(K.backupOn) || "0");
+      setBackupEnabled(saved === "1");
+    }
+
+    backupSwitch.addEventListener("click", ()=>{
+      const next = !backupToggle.checked;
+      setBackupEnabled(next);
+    });
+
     // ===== init =====
-    renderGrid();
-    loadAllCells();
+    function initOrientation(){
+      const saved = localStorage.getItem(K.ori) || "portrait";
+      orientationSelect.value = saved;
+      applyOrientation(saved);
+    }
 
-    initTheme();
-    initOrientation();
-    applyTitleToUI();
+    function initDateSwitch(){
+      const enabled = localStorage.getItem(K.dateOn) === "1";
+      enableDateLink(enabled, false);
+      setSwitchVisual(dateSwitch, dateLinkToggle.checked);
+    }
 
-    // switch init
-    const enabled = localStorage.getItem(K.dateOn) === "1";
-    enableDateLink(enabled, false);
+    function init(){
+      renderGrid();
+      loadAllCells();
+
+      initTheme();
+      initOrientation();
+      initBackupToggle();
+      applyTitleToUI();
+
+      initDateSwitch();
+
+      // 기본 셀 선택(엑셀 느낌)
+      selectCell(0,0,false);
+
+      // expander가 먹히도록 첫 로드에서 hasMore 계산 반영됨
+    }
+
+    // ===== date switch init function needs to exist before call =====
+    // (enableDateLink already declared earlier)
+    // also keep switch visual synced
     setSwitchVisual(dateSwitch, dateLinkToggle.checked);
+    setSwitchVisual(backupSwitch, backupToggle.checked);
+
+    init();
+
+    // hide tooltip on scroll
+    document.addEventListener("scroll", ()=> hideTooltip(), {passive:true});
+    window.addEventListener("resize", ()=> hideTooltip());
+
+    // prevent tooltip stuck
+    document.addEventListener("pointerdown", ()=>{
+      const now = Date.now();
+      if(now - lastPointerDownTS < 120) hideTooltip();
+      lastPointerDownTS = now;
+    });
+
   </script>
 </body>
 </html>
