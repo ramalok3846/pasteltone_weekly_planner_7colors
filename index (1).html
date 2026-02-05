@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>파스텔톤 주간 플래너</title>
+
+  <!-- Favicon (같은 폴더에 두면 자동 인식) -->
+  <link rel="icon" type="image/x-icon" href="PWP7_favicon_ultra.ico">
+  <link rel="icon" type="image/png" sizes="512x512" href="PWP7_favicon_ultra.png">
+  <link rel="apple-touch-icon" href="PWP7_favicon_ultra.png">
+
+  <style>
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --ink:#111827; --muted:#6b7280;
+      --shadow: 0 12px 30px rgba(17,24,39,.10);
+
+      --t-header:#e6e2ff;
+      --t-left:#f3f2ff;
+      --t-border:#b7b0ff;
+      --t-accent:#6b5bff;
+      --t-weekend-sat:#1d4ed8;
+      --t-weekend-sun:#dc2626;
+      --t-pill:#ffffff;
+      --t-pill-border:#b7b0ff;
+      --t-pill-text:#111827;
+      --t-focus:#111827;
+    }
+    [data-theme="pink"]{--t-header:#f7dce7;--t-left:#fdf1f6;--t-border:#f0b7cd;--t-accent:#ea7ea8;--t-pill-border:#f0b7cd;}
+    [data-theme="apricot"]{--t-header:#ffe3d3;--t-left:#fff5ee;--t-border:#ffc6a7;--t-accent:#ff8a5b;--t-pill-border:#ffc6a7;}
+    [data-theme="butter"]{--t-header:#fff1c7;--t-left:#fff9e7;--t-border:#ffe08a;--t-accent:#ffb703;--t-pill-border:#ffe08a;}
+    [data-theme="mint"]{--t-header:#d9f7ef;--t-left:#f0fffb;--t-border:#9fe7d6;--t-accent:#2cbfa3;--t-pill-border:#9fe7d6;}
+    [data-theme="lightblue"]{--t-header:#dfeaff;--t-left:#f3f7ff;--t-border:#a9c3ff;--t-accent:#4f86ff;--t-pill-border:#a9c3ff;}
+    [data-theme="violetblue"]{--t-header:#e6e2ff;--t-left:#f3f2ff;--t-border:#b7b0ff;--t-accent:#6b5bff;--t-pill-border:#b7b0ff;}
+    [data-theme="lavender"]{--t-header:#efe2ff;--t-left:#f7f0ff;--t-border:#d0b3ff;--t-accent:#a855f7;--t-pill-border:#d0b3ff;}
+    [data-theme="ivory"]{--t-header:#f5f1df;--t-left:#fbf9f0;--t-border:#e4dcb6;--t-accent:#b59b4c;--t-pill-border:#e4dcb6;}
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",Arial,sans-serif;}
+    button,input,select,textarea{font:inherit}
+    .wrap{max-width:1200px;margin:18px auto 40px;padding:0 14px}
+
+    .topbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .leftbar,.rightbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .rightbar{justify-content:flex-end}
+    .btn{border:1px solid rgba(0,0,0,.08);background:#fff;padding:9px 12px;border-radius:12px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.05);user-select:none}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{border-color:color-mix(in srgb,var(--t-accent) 55%,white);background:color-mix(in srgb,var(--t-header) 45%,white)}
+    .btn.danger{border-color:color-mix(in srgb,#ef4444 45%,white);background:color-mix(in srgb,#fecaca 55%,white);color:#7f1d1d}
+
+    .chip{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(0,0,0,.08);padding:8px 10px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.05);user-select:none}
+    .betaLabel{font-style:italic;font-weight:500;color:#2563eb}
+    .toggle{width:44px;height:26px;border-radius:999px;background:#e5e7eb;position:relative;cursor:pointer;border:1px solid rgba(0,0,0,.08);flex:0 0 auto}
+    .toggle::after{content:"";width:20px;height:20px;border-radius:999px;position:absolute;top:2px;left:2px;background:#fff;box-shadow:0 6px 14px rgba(0,0,0,.12);transition:all .18s ease}
+    .toggle[data-on="1"]{background:color-mix(in srgb,var(--t-accent) 60%,white)}
+    .toggle[data-on="1"]::after{left:22px}
+    .iconBtn{width:30px;height:30px;border-radius:999px;border:1px solid rgba(0,0,0,.10);background:#fff;display:grid;place-items:center;cursor:pointer}
+    .iconBtn svg{width:16px;height:16px}
+
+    .card{background:var(--panel);border-radius:22px;box-shadow:var(--shadow);padding:14px;border:1px solid rgba(0,0,0,.06)}
+    .titleRow{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap}
+    .titleLeft{display:flex;flex-direction:column;gap:6px;min-width:220px}
+    .titlePill{display:inline-flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;border:2px solid var(--t-pill-border);background:var(--t-pill);color:var(--t-pill-text);font-weight:800;user-select:none;cursor:pointer;width:fit-content;max-width:100%}
+    .titlePill .editBadge{font-weight:700;color:var(--muted);border:1px solid rgba(0,0,0,.12);padding:4px 8px;border-radius:999px;background:#fff}
+    .subtitle{color:var(--muted);font-weight:600}
+
+    .gridWrap{border-radius:18px;overflow:hidden;border:1px solid var(--t-border)}
+    table{border-collapse:collapse;width:100%;table-layout:fixed;background:#fff}
+    thead th{background:var(--t-header);border-bottom:1px solid var(--t-border);padding:10px 8px;text-align:center;font-weight:900}
+    thead th:last-child,tbody td:last-child{border-right:1px solid var(--t-border)}
+    tbody th{background:var(--t-left);font-weight:900;text-align:center;padding:10px 6px;border-right:1px solid var(--t-border);border-bottom:1px solid var(--t-border);width:84px}
+    tbody td{border-right:1px solid var(--t-border);border-bottom:1px solid var(--t-border);height:44px;padding:6px 8px;vertical-align:top;position:relative;background:#fff;cursor:pointer}
+    tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+
+    .dayHdr{display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;line-height:1.05}
+    .dayHdr .dow{font-size:15px}
+    .dayHdr .date{font-size:12px;color:var(--muted);font-weight:800}
+    .dayHdr.sat .dow,.dayHdr.sat .date{color:var(--t-weekend-sat)}
+    .dayHdr.sun .dow,.dayHdr.sun .date{color:var(--t-weekend-sun)}
+
+    .diag{position:relative;padding:0;width:100px;min-width:100px}
+    .diagBox{position:relative;height:100%;min-height:56px;background:var(--t-header)}
+    .diagBox::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,transparent calc(50% - 1px),var(--t-border) calc(50% - 1px),var(--t-border) calc(50% + 1px),transparent calc(50% + 1px));pointer-events:none;opacity:.95}
+    .diagTop,.diagBottom{position:absolute;font-weight:900;user-select:none}
+    .diagTop{top:8px;right:10px}
+    .diagBottom{bottom:8px;left:10px}
+
+    .cellText{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;padding-right:20px}
+    .cellEmptyHint{color:rgba(107,114,128,.55);font-weight:800;user-select:none}
+    .cellChevron{position:absolute;right:6px;top:6px;width:18px;height:18px;border-radius:8px;border:1px solid rgba(0,0,0,.12);background:#fff;display:none;place-items:center;cursor:pointer}
+    td.hasMore .cellChevron{display:grid}
+    .cellChevron svg{width:12px;height:12px}
+    .cellExpanded{white-space:pre-wrap;display:none;margin-top:6px;padding:8px;border-radius:10px;background:color-mix(in srgb,var(--t-left) 65%,white);border:1px dashed color-mix(in srgb,var(--t-border) 55%,white);font-weight:700}
+    td.expanded .cellExpanded{display:block}
+    td.selected{outline:3px solid color-mix(in srgb,var(--t-focus) 70%,white);outline-offset:-3px;z-index:1}
+
+    .tooltip{position:fixed;z-index:500;max-width:min(360px,70vw);background:#fff;border:1px solid rgba(0,0,0,.12);box-shadow:var(--shadow);border-radius:16px;padding:10px 12px;display:none;pointer-events:none}
+    .tooltip .tTitle{font-weight:900;margin-bottom:6px}
+    .tooltip .tBody{white-space:pre-wrap;font-weight:700}
+
+    .backdrop{position:fixed;inset:0;background:rgba(17,24,39,.25);z-index:900;display:none}
+    .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 26px));background:#fff;border-radius:22px;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.10);z-index:910;display:none;overflow:hidden}
+    .modal[data-opacity="2"]{opacity:.86}
+    .modal[data-opacity="3"]{opacity:.72}
+    .modalHeader{padding:12px 14px;background:color-mix(in srgb,var(--t-header) 70%,white);border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;cursor:grab;user-select:none}
+    .modalHeader:active{cursor:grabbing}
+    .modalTitle{font-weight:950}
+    .modalHdrBtns{display:flex;gap:8px;align-items:center}
+    .miniBtn{width:30px;height:30px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#fff;display:grid;place-items:center;cursor:pointer}
+    .miniBtn svg{width:16px;height:16px}
+    .modalBody{padding:14px}
+    .modalFooter{padding:12px 14px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid rgba(0,0,0,.08);background:#fff}
+    .modal.minimized .modalBody,.modal.minimized .modalFooter{display:none}
+
+    .fieldLabel{font-weight:900;color:var(--muted);margin:10px 0 6px}
+    .input, textarea{width:100%;border:1px solid rgba(0,0,0,.14);border-radius:14px;padding:10px 12px;outline:none;background:#fff}
+    textarea{min-height:180px;resize:vertical;font-weight:700}
+    .hintRow{display:flex;gap:10px;color:var(--muted);font-weight:700;margin-top:8px;flex-wrap:wrap}
+    .kbd{border:1px solid rgba(0,0,0,.16);border-bottom-width:2px;border-radius:8px;padding:2px 6px;background:#fff;color:#111827;font-weight:900}
+
+    .calTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .calTop .left{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:900}
+    .calTop .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .calPreview{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid rgba(0,0,0,.10);border-radius:999px;padding:8px 10px;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+    .calPreview .check{width:18px;height:18px;border-radius:6px;background:color-mix(in srgb,var(--t-accent) 65%,white);display:grid;place-items:center;color:#fff;font-weight:900}
+    .calGrid{border:1px solid var(--t-border);border-radius:18px;overflow:hidden}
+    .calGrid .dowRow{display:grid;grid-template-columns:repeat(7,1fr);background:var(--t-header);border-bottom:1px solid var(--t-border)}
+    .calGrid .dowRow div{padding:10px 8px;text-align:center;font-weight:950}
+    .calGrid .dowRow .sat{color:var(--t-weekend-sat)}
+    .calGrid .dowRow .sun{color:var(--t-weekend-sun)}
+    .weeks{display:grid;grid-template-rows:repeat(6,auto)}
+    .weekRow{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--t-border);background:#fff;cursor:pointer;position:relative}
+    .weekRow:last-child{border-bottom:0}
+    .dayCell{padding:14px 10px;border-right:1px solid var(--t-border);min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:950}
+    .dayCell:last-child{border-right:0}
+    .dayCell .m{font-size:12px;color:var(--muted);font-weight:900}
+    .dayCell.out{opacity:.35}
+    .dayCell.sat{color:var(--t-weekend-sat)}
+    .dayCell.sun{color:var(--t-weekend-sun)}
+    .weekRow.preview{outline:3px solid color-mix(in srgb,var(--t-accent) 55%,white);outline-offset:-3px;background:color-mix(in srgb,var(--t-left) 55%,white)}
+    .weekRow .pill{position:absolute;left:10px;top:10px;background:#fff;border:1px solid rgba(0,0,0,.10);border-radius:999px;padding:6px 10px;font-weight:950;display:none;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+    .weekRow.preview .pill{display:inline-flex}
+
+    .backupList{border:1px solid rgba(0,0,0,.10);border-radius:16px;overflow:hidden;background:#fff}
+    .backupItem{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(0,0,0,.06)}
+    .backupItem:last-child{border-bottom:0}
+    .dot{width:10px;height:10px;border-radius:999px;flex:0 0 auto;background:#93c5fd}
+    .dot.manual{background:#86efac}
+    .backupMeta{display:flex;align-items:center;gap:10px;min-width:0}
+    .backupText{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .backupBtns{display:flex;gap:8px;flex:0 0 auto}
+
+    .joy{position:fixed;right:12px;bottom:12px;z-index:800;display:none;user-select:none}
+    .joyPad{background:#fff;border:1px solid rgba(0,0,0,.10);border-radius:18px;box-shadow:var(--shadow);padding:10px;display:grid;grid-template-columns:52px 52px 52px;grid-template-rows:52px 52px 52px;gap:8px}
+    .joyBtn{border:1px solid rgba(0,0,0,.12);border-radius:16px;background:color-mix(in srgb,var(--t-left) 55%,white);font-weight:950;cursor:pointer;display:grid;place-items:center}
+    .joyBtn:active{transform:translateY(1px)}
+    .joyBottomRow{margin-top:10px;display:flex;gap:10px;justify-content:flex-end}
+
+    @media print{
+      body{background:#fff}
+      .wrap{max-width:none;margin:0;padding:0}
+      .topbar{display:none !important}
+      .card{box-shadow:none;border:0;border-radius:0;padding:0}
+      .editBadge,.cellEmptyHint,.cellChevron,.cellExpanded,.tooltip,.backdrop,.modal,.joy{display:none !important}
+      .printArea{width:190mm;margin:0 auto}
+      .gridWrap{border-radius:0}
+      thead th:last-child,tbody td:last-child{border-right:1px solid var(--t-border) !important}
+    }
+    @page{margin:10mm;size:A4 portrait}
+    body.print-landscape @page{size:A4 landscape}
+    body.print-landscape .printArea{width:277mm}
+
+    @media (max-width:720px){
+      tbody th{width:64px}
+      .diag{width:86px;min-width:86px}
+    }
+  </style>
+</head>
+
+<body data-theme="violetblue">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="leftbar">
+        <button class="btn primary" id="btnTheme">색깔 선택</button>
+        <button class="btn" id="btnDateLink">날짜 연동: <b id="dateLinkState">OFF</b></button>
+        <button class="btn" id="btnWeekPick" style="display:none">주 선택</button>
+
+        <span class="chip">
+          <span class="betaLabel">Beta버전</span>
+          <span class="toggle" id="betaToggle" data-on="0"></span>
+          <span class="iconBtn" id="betaInfo" title="정보">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 10v7"></path>
+              <path d="M12 7h.01"></path>
+            </svg>
+          </span>
+        </span>
+      </div>
+
+      <div class="rightbar">
+        <select class="btn" id="selPaper">
+          <option value="portrait">세로(A4)</option>
+          <option value="landscape">가로(A4)</option>
+        </select>
+        <button class="btn primary" id="btnPrint">인쇄</button>
+
+        <button class="btn" id="btnDownload">다운로드</button>
+        <button class="btn" id="btnExport">내보내기</button>
+        <button class="btn" id="btnImport">가져오기</button>
+
+        <button class="btn" id="btnManualSave">수동 저장</button>
+        <button class="btn" id="btnBackups">백업</button>
+
+        <button class="btn" id="btnJoy">조이스틱 실행</button>
+        <button class="btn danger" id="btnResetAll">전체 초기화</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="titleRow">
+        <div class="titleLeft">
+          <div class="titlePill" id="titlePill" title="클릭해서 제목 편집">
+            <span id="titleText">주간 플래너</span>
+            <span class="editBadge">편집</span>
+          </div>
+          <div class="subtitle" id="periodText" style="display:none">기간: -</div>
+        </div>
+      </div>
+
+      <div class="printArea">
+        <div class="gridWrap">
+          <table id="plannerTable">
+            <thead>
+              <tr>
+                <th class="diag">
+                  <div class="diagBox">
+                    <div class="diagTop">요일</div>
+                    <div class="diagBottom">시간</div>
+                  </div>
+                </th>
+                <th><div class="dayHdr"><div class="dow">월</div><div class="date"></div></div></th>
+                <th><div class="dayHdr"><div class="dow">화</div><div class="date"></div></div></th>
+                <th><div class="dayHdr"><div class="dow">수</div><div class="date"></div></div></th>
+                <th><div class="dayHdr"><div class="dow">목</div><div class="date"></div></div></th>
+                <th><div class="dayHdr"><div class="dow">금</div><div class="date"></div></div></th>
+                <th><div class="dayHdr sat"><div class="dow">토</div><div class="date"></div></div></th>
+                <th><div class="dayHdr sun"><div class="dow">일</div><div class="date"></div></div></th>
+              </tr>
+            </thead>
+            <tbody id="plannerBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tooltip" id="tooltip">
+    <div class="tTitle" id="ttTitle"></div>
+    <div class="tBody" id="ttBody"></div>
+  </div>
+
+  <div class="backdrop" id="backdrop"></div>
+  <div class="modal" id="modal">
+    <div class="modalHeader" id="modalHeader">
+      <div class="modalTitle" id="modalTitle">알림</div>
+      <div class="modalHdrBtns">
+        <button class="miniBtn" id="btnOpacity" title="투명도">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2s7 6 7 12a7 7 0 1 1-14 0c0-6 7-12 7-12z"></path>
+          </svg>
+        </button>
+        <button class="miniBtn" id="btnMin" title="축소">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 12h12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="modalBody" id="modalBody"></div>
+    <div class="modalFooter" id="modalFooter"></div>
+  </div>
+
+  <div class="joy" id="joy">
+    <div class="joyPad">
+      <div></div><button class="joyBtn" data-move="up">▲</button><div></div>
+      <button class="joyBtn" data-move="left">◀</button><button class="joyBtn" data-act="open">⏎</button><button class="joyBtn" data-move="right">▶</button>
+      <div></div><button class="joyBtn" data-move="down">▼</button><div></div>
+    </div>
+    <div class="joyBottomRow">
+      <button class="btn" id="joyClearSel">셀 선택 해제</button>
+      <button class="btn danger" id="joyExit">조이스틱 종료</button>
+    </div>
+  </div>
+
+  <script>
+    const KEY = {
+      theme:"pwp7_theme", cells:"pwp7_cells_v2", title:"pwp7_title",
+      dateLink:"pwp7_dateLink", week:"pwp7_weekRange",
+      printHideCount:"pwp7_print_hide3",
+      backups:"pwp7_backups_v2", autoBackupOn:"pwp7_autoBackupOn",
+      dlPrefs:"pwp7_download_prefs_v2",
+      betaOn:"pwp7_beta_on", betaSettings:"pwp7_beta_settings_v2",
+      betaRunning:"pwp7_beta_running_v2", appLang:"pwp7_app_lang"
+    };
+
+    const pad2 = n=>String(n).padStart(2,"0");
+    const fmtTS = d=>`${d.getFullYear()}.${pad2(d.getMonth()+1)}.${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+    const safeJSON=(s,f)=>{try{return JSON.parse(s)}catch{return f}};
+    const escapeHtml=s=>(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+
+    const body=document.body;
+
+    const THEMES=[
+      {id:"pink",name:"분홍"},{id:"apricot",name:"연주황"},{id:"butter",name:"연노랑"},{id:"mint",name:"민트"},
+      {id:"lightblue",name:"라이트 블루"},{id:"violetblue",name:"블루 바이올렛"},{id:"lavender",name:"연보라"},{id:"ivory",name:"아이보리"}
+    ];
+    function setTheme(id){body.setAttribute("data-theme",id);localStorage.setItem(KEY.theme,id)}
+    setTheme(localStorage.getItem(KEY.theme)||"violetblue");
+
+    const TIMES=["06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00","00:00","01:00"];
+    const DOWS=["mon","tue","wed","thu","fri","sat","sun"];
+    const DOW_NAMES={mon:"월",tue:"화",wed:"수",thu:"목",fri:"금",sat:"토",sun:"일"};
+
+    const plannerBody=document.getElementById("plannerBody");
+    const makeKey=(r,c)=>`${r}_${c}`;
+    let cellData=safeJSON(localStorage.getItem(KEY.cells),{});
+    let selected={r:0,c:0,active:false};
+
+    function saveCells(){localStorage.setItem(KEY.cells,JSON.stringify(cellData))}
+    function setCell(r,c,value){
+      const k=makeKey(r,c);
+      if((value??"").toString().trim().length===0) delete cellData[k];
+      else cellData[k]=value;
+      saveCells();
+      renderRows();
+    }
+
+    // Tooltip
+    const tooltip=document.getElementById("tooltip");
+    const ttTitle=document.getElementById("ttTitle");
+    const ttBody=document.getElementById("ttBody");
+    let ttTimer=null;
+    function isModalOpen(){return modalStack.length>0}
+    function showTooltip(evt,r,c,text){
+      if(isModalOpen()) return;
+      clearTimeout(ttTimer);
+      ttTitle.textContent=`${TIMES[r]} · ${DOW_NAMES[DOWS[c]]}`;
+      ttBody.textContent=text;
+      tooltip.style.display="block";
+      positionTooltip(evt);
+      ttTimer=setTimeout(()=>hideTooltip(),1200);
+    }
+    function positionTooltip(evt){
+      const pad=14;
+      let x=evt.clientX+14,y=evt.clientY+14;
+      const rect=tooltip.getBoundingClientRect();
+      if(x+rect.width+pad>innerWidth) x=innerWidth-rect.width-pad;
+      if(y+rect.height+pad>innerHeight) y=innerHeight-rect.height-pad;
+      tooltip.style.left=x+"px";tooltip.style.top=y+"px";
+    }
+    function hideTooltip(){clearTimeout(ttTimer);tooltip.style.display="none"}
+    addEventListener("scroll",hideTooltip,{passive:true});
+    addEventListener("pointerdown",hideTooltip,{passive:true});
+
+    function refreshSelection(){
+      document.querySelectorAll("td.selected").forEach(td=>td.classList.remove("selected"));
+      if(!selected.active) return;
+      const td=document.querySelector(`td[data-r="${selected.r}"][data-c="${selected.c}"]`);
+      if(td) td.classList.add("selected");
+    }
+
+    function renderRows(){
+      plannerBody.innerHTML="";
+      TIMES.forEach((t,r)=>{
+        const tr=document.createElement("tr");
+        const th=document.createElement("th");th.textContent=t;tr.appendChild(th);
+
+        for(let c=0;c<7;c++){
+          const td=document.createElement("td");
+          td.dataset.r=String(r);td.dataset.c=String(c);
+          const k=makeKey(r,c);
+          const val=(cellData[k]??"").toString();
+          const lines=val.split("\n");
+          const first=(val.trim().length===0)?"":(lines[0]??"");
+          const hasMore=val.trim().length>0 && (lines.length>1);
+
+          const text=document.createElement("span");
+          text.className="cellText";
+          if(val.trim().length===0){text.classList.add("cellEmptyHint");text.textContent="클릭해서 입력";}
+          else text.textContent=first;
+          td.appendChild(text);
+
+          const chev=document.createElement("div");
+          chev.className="cellChevron";
+          chev.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>`;
+          td.appendChild(chev);
+
+          const exp=document.createElement("div");
+          exp.className="cellExpanded";
+          exp.textContent=val;
+          td.appendChild(exp);
+
+          if(hasMore) td.classList.add("hasMore");
+
+          td.addEventListener("click",(e)=>{
+            if(e.target.closest(".cellChevron")){
+              td.classList.toggle("expanded");
+              hideTooltip();
+              e.stopPropagation();
+              return;
+            }
+            openCellEditor(r,c);
+          });
+          td.addEventListener("mouseenter",(e)=>{
+            const v=(cellData[makeKey(r,c)]??"").toString().trim();
+            if(!v) return;
+            showTooltip(e,r,c,v);
+          });
+          td.addEventListener("mousemove",(e)=>{if(tooltip.style.display!=="none") positionTooltip(e)});
+          td.addEventListener("mouseleave",hideTooltip);
+
+          tr.appendChild(td);
+        }
+        plannerBody.appendChild(tr);
+      });
+      refreshSelection();
+    }
+    renderRows();
+
+    // Modal system (stack)
+    const backdrop=document.getElementById("backdrop");
+    const modal=document.getElementById("modal");
+    const modalHeader=document.getElementById("modalHeader");
+    const modalTitle=document.getElementById("modalTitle");
+    const modalBody=document.getElementById("modalBody");
+    const modalFooter=document.getElementById("modalFooter");
+    const btnMin=document.getElementById("btnMin");
+    const btnOpacity=document.getElementById("btnOpacity");
+    let modalStack=[];
+    let modalOpacity=1;
+
+    function renderModalTop(resetPos=false){
+      hideTooltip();
+      backdrop.style.display="block";modal.style.display="block";
+      modal.classList.remove("minimized");modal.removeAttribute("data-opacity");modalOpacity=1;
+      if(resetPos){modal.style.left="50%";modal.style.top="50%";modal.style.transform="translate(-50%,-50%)"}
+      const top=modalStack[modalStack.length-1];
+      modalTitle.textContent=top.title||"알림";
+      modalBody.innerHTML=top.body||"";
+      modalFooter.innerHTML=top.footer||`<button class="btn primary" data-act="ok">확인</button>`;
+
+      modalFooter.querySelectorAll("[data-act]").forEach(b=>{
+        b.addEventListener("click",()=>{
+          const act=b.getAttribute("data-act");
+          if(typeof top.onAction==="function"){
+            const shouldClose=top.onAction(act);
+            if(shouldClose!==false) closeModal();
+          }else{
+            closeModal();
+          }
+        });
+      });
+    }
+    function showModal(cfg){modalStack.push(cfg);renderModalTop(true)}
+    function closeModal(){
+      modalStack.pop();
+      if(modalStack.length===0){
+        backdrop.style.display="none";modal.style.display="none";
+        modal.classList.remove("minimized");modal.removeAttribute("data-opacity");modalOpacity=1;
+        modal.style.left="50%";modal.style.top="50%";modal.style.transform="translate(-50%,-50%)";
+      }else renderModalTop();
+    }
+
+    // Draggable
+    let drag=null;
+    modalHeader.addEventListener("mousedown",(e)=>{
+      if(!isModalOpen()) return;
+      const rect=modal.getBoundingClientRect();
+      drag={sx:e.clientX,sy:e.clientY,left:rect.left,top:rect.top};
+      modal.style.transform="translate(0,0)";
+      modal.style.left=rect.left+"px";
+      modal.style.top=rect.top+"px";
+      e.preventDefault();
+    });
+    addEventListener("mousemove",(e)=>{
+      if(!drag) return;
+      modal.style.left=(drag.left+(e.clientX-drag.sx))+"px";
+      modal.style.top=(drag.top+(e.clientY-drag.sy))+"px";
+    });
+    addEventListener("mouseup",()=>drag=null);
+
+    btnMin.addEventListener("click",()=>modal.classList.toggle("minimized"));
+    btnOpacity.addEventListener("click",()=>{
+      modalOpacity=modalOpacity%3+1;
+      if(modalOpacity===1) modal.removeAttribute("data-opacity");
+      else modal.setAttribute("data-opacity",String(modalOpacity));
+    });
+
+    function appAlert(title,message,{okText="확인",hide3=false,onOk=null}={}){
+      let extra="";
+      if(hide3) extra=`<button class="btn" data-act="hide3">3회 동안 숨김</button>`;
+      showModal({
+        title,
+        body:`<div style="font-weight:800;color:var(--muted);white-space:pre-wrap">${message}</div>`,
+        footer:`${extra}<button class="btn primary" data-act="ok">${okText}</button>`,
+        onAction:(act)=>{
+          if(act==="hide3"){localStorage.setItem(KEY.printHideCount,"3");return true}
+          if(act==="ok" && typeof onOk==="function") onOk();
+          return true;
+        }
+      });
+    }
+    function appConfirm(title,message,{okText="확인",cancelText="취소",onOk=null,onCancel=null}={}){
+      showModal({
+        title,
+        body:`<div style="font-weight:800;color:var(--muted);white-space:pre-wrap">${message}</div>`,
+        footer:`<button class="btn" data-act="cancel">${cancelText}</button><button class="btn primary" data-act="ok">${okText}</button>`,
+        onAction:(act)=>{
+          if(act==="ok" && typeof onOk==="function") onOk();
+          if(act==="cancel" && typeof onCancel==="function") onCancel();
+          return true;
+        }
+      });
+    }
+
+    // Title
+    const titlePill=document.getElementById("titlePill");
+    const titleText=document.getElementById("titleText");
+    function loadTitle(){
+      const t=localStorage.getItem(KEY.title);
+      titleText.textContent=(t&&t.trim())?t.trim():"주간 플래너";
+    }
+    loadTitle();
+
+    titlePill.addEventListener("click",()=>{
+      const cur=titleText.textContent.trim()||"주간 플래너";
+      showModal({
+        title:"제목 편집",
+        body:`<div class="fieldLabel">제목</div><input class="input" id="inpTitle" value="${escapeHtml(cur)}"/><div class="hintRow"><span class="kbd">Enter</span> 저장</div>`,
+        footer:`<button class="btn" data-act="cancel">취소</button><button class="btn primary" data-act="ok">확인</button>`,
+        onAction:(act)=>{
+          if(act==="ok"){
+            const v=document.getElementById("inpTitle").value.trim();
+            localStorage.setItem(KEY.title,v||"주간 플래너");
+            loadTitle();
+          }
+          return true;
+        }
+      });
+      setTimeout(()=>{
+        const inp=document.getElementById("inpTitle");
+        inp.focus();inp.select();
+        inp.addEventListener("keydown",(e)=>{
+          if(e.key==="Enter"){e.preventDefault();localStorage.setItem(KEY.title,inp.value.trim()||"주간 플래너");loadTitle();closeModal();}
+        });
+      },0);
+    });
+
+    // Cell editor
+    function openCellEditor(r,c){
+      selected={r,c,active:true};refreshSelection();
+      const cur=(cellData[makeKey(r,c)]??"").toString();
+      showModal({
+        title:`${TIMES[r]} · ${DOW_NAMES[DOWS[c]]}`,
+        body:`<div class="fieldLabel">내용</div>
+              <textarea id="cellTA" placeholder="여기에 입력">${escapeHtml(cur)}</textarea>
+              <div class="hintRow">
+                <span><span class="kbd">Enter</span> 줄바꿈</span>
+                <span><span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> 저장</span>
+                <span><span class="kbd">Ctrl</span>+<span class="kbd">Del</span> 비우기</span>
+              </div>`,
+        footer:`<button class="btn" data-act="clear">비우기</button><button class="btn" data-act="cancel">취소</button><button class="btn primary" data-act="save">확인</button>`,
+        onAction:(act)=>{
+          const ta=document.getElementById("cellTA");
+          if(act==="save"){setCell(r,c,ta.value);return true}
+          if(act==="clear"){setCell(r,c,"");return true}
+          return true;
+        }
+      });
+      setTimeout(()=>{
+        const ta=document.getElementById("cellTA");ta.focus();
+        ta.addEventListener("keydown",(e)=>{
+          if(e.key==="Enter" && e.ctrlKey){e.preventDefault();setCell(r,c,ta.value);closeModal();}
+          if(e.key==="Delete" && e.ctrlKey){e.preventDefault();setCell(r,c,"");closeModal();}
+        });
+      },0);
+    }
+
+    // Selection + keyboard
+    function moveSel(dr,dc){
+      if(!selected.active) selected={r:0,c:0,active:true};
+      selected.r=Math.max(0,Math.min(TIMES.length-1,selected.r+dr));
+      selected.c=Math.max(0,Math.min(6,selected.c+dc));
+      refreshSelection();
+      const td=document.querySelector(`td[data-r="${selected.r}"][data-c="${selected.c}"]`);
+      if(td) td.scrollIntoView({block:"nearest",inline:"nearest"});
+    }
+    function clearSel(){selected.active=false;refreshSelection();}
+    addEventListener("keydown",(e)=>{
+      if(isModalOpen()) return;
+      if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)){
+        e.preventDefault();
+        if(e.key==="ArrowUp") moveSel(-1,0);
+        if(e.key==="ArrowDown") moveSel(1,0);
+        if(e.key==="ArrowLeft") moveSel(0,-1);
+        if(e.key==="ArrowRight") moveSel(0,1);
+      }
+      if(e.key==="Enter" && selected.active){e.preventDefault();openCellEditor(selected.r,selected.c);}
+      if(e.key==="Escape") clearSel();
+    });
+    document.addEventListener("click",(e)=>{
+      if(e.target.closest("td")||e.target.closest(".modal")||e.target.closest(".joy")) return;
+      clearSel();
+    });
+
+    // Date link / Week picker
+    const btnDateLink=document.getElementById("btnDateLink");
+    const dateLinkState=document.getElementById("dateLinkState");
+    const btnWeekPick=document.getElementById("btnWeekPick");
+    const periodText=document.getElementById("periodText");
+    let dateLinkOn=(localStorage.getItem(KEY.dateLink)==="1");
+
+    function setHeaderDates(range){
+      document.querySelectorAll(".dayHdr .date").forEach(d=>d.textContent="");
+      if(!range) return;
+      for(let i=0;i<7;i++){
+        const d=new Date(range.start);d.setDate(d.getDate()+i);
+        document.querySelectorAll(".dayHdr .date")[i].textContent=`(${d.getMonth()+1}월 ${d.getDate()}일)`;
+      }
+    }
+    function calcMonthWeekLabelForRange(ws,we){
+      const days=[...Array(7)].map((_,i)=>{const d=new Date(ws);d.setDate(ws.getDate()+i);return d;});
+      const day1=days.find(d=>d.getDate()===1);
+      let by=ws.getFullYear(), bm=ws.getMonth();
+      if(day1){by=day1.getFullYear();bm=day1.getMonth();}
+      const first=new Date(by,bm,1);
+      const firstDow=(first.getDay()+6)%7;
+      const firstMon=new Date(first);firstMon.setDate(first.getDate()-firstDow);
+      const diffDays=Math.round((ws-firstMon)/(1000*60*60*24));
+      const weekNo=Math.floor(diffDays/7)+1;
+      return {year:by,month:bm,weekNo};
+    }
+    function buildAutoTitle(range){
+      const lab=calcMonthWeekLabelForRange(range.start,range.end);
+      const sM=range.start.getMonth()+1,sD=range.start.getDate();
+      const eM=range.end.getMonth()+1,eD=range.end.getDate();
+      return {label:`${lab.month+1}월 ${lab.weekNo}주 플래너(${sM}월 ${sD}일 ~ ${eM}월 ${eD}일)`,
+              period:`기간: ${sM}월 ${sD}일 ~ ${eM}월 ${eD}일`,
+              lab};
+    }
+    function applyWeek(range){
+      const auto=buildAutoTitle(range);
+      localStorage.setItem(KEY.week,JSON.stringify({start:range.start.toISOString(),end:range.end.toISOString(),autoTitle:true}));
+      localStorage.setItem(KEY.title,auto.label);
+      loadTitle();
+      periodText.textContent=auto.period;
+      periodText.style.display="";
+      setHeaderDates(range);
+    }
+    function openWeekPicker(){
+      const today=new Date();
+      let viewY=today.getFullYear(), viewM=today.getMonth();
+      const existing=safeJSON(localStorage.getItem(KEY.week),null);
+      let previewRange=null;
+      if(existing){previewRange={start:new Date(existing.start),end:new Date(existing.end)};viewY=previewRange.start.getFullYear();viewM=previewRange.start.getMonth();}
+      else{
+        const dow=(today.getDay()+6)%7;
+        const mon=new Date(today);mon.setDate(today.getDate()-dow);
+        const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+        previewRange={start:mon,end:sun};
+        const bel=calcMonthWeekLabelForRange(mon,sun);viewY=bel.year;viewM=bel.month;
+      }
+      const sameDate=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+
+      function renderCalendar(){
+        const base=new Date(viewY,viewM,1);
+        const baseDow=(base.getDay()+6)%7;
+        const gridStart=new Date(base);gridStart.setDate(base.getDate()-baseDow);
+
+        let html=`
+          <div class="calTop">
+            <div class="left"><span class="chip"><b>주 선택</b></span><span class="chip"><b>${viewY}년 ${viewM+1}월</b></span></div>
+            <div class="right">
+              <div class="calPreview"><span>미리보기:</span>
+                <span id="prevText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw"></span>
+                <span class="check">✓</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+            <button class="btn" id="btnPrevMon">◀</button>
+            <button class="btn" id="btnThisMon">이번 달</button>
+            <button class="btn primary" id="btnThisWeek">이번 주</button>
+            <button class="btn" id="btnNextMon">▶</button>
+          </div>
+          <div class="calGrid">
+            <div class="dowRow"><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="sat">토</div><div class="sun">일</div></div>
+            <div class="weeks" id="weeksWrap">
+        `;
+        for(let w=0;w<6;w++){
+          const ws=new Date(gridStart);ws.setDate(gridStart.getDate()+w*7);
+          const we=new Date(ws);we.setDate(ws.getDate()+6);
+          const bel=calcMonthWeekLabelForRange(ws,we);
+          const isPrev=sameDate(ws,previewRange.start);
+          html+=`<div class="weekRow ${isPrev?"preview":""}" data-ws="${ws.toISOString()}" data-we="${we.toISOString()}" data-by="${bel.year}" data-bm="${bel.month}" data-bw="${bel.weekNo}">
+                  <div class="pill">${bel.month+1}월 ${bel.weekNo}주</div>`;
+          for(let d=0;d<7;d++){
+            const cur=new Date(ws);cur.setDate(ws.getDate()+d);
+            const inMonth=(cur.getMonth()===viewM);
+            const cls=["dayCell",inMonth?"":"out",(d===5)?"sat":"",(d===6)?"sun":""].filter(Boolean).join(" ");
+            html+=`<div class="${cls}"><div style="font-size:18px">${cur.getDate()}</div><div class="m">${cur.getMonth()+1}월</div></div>`;
+          }
+          html+=`</div>`;
+        }
+        html+=`</div></div>
+              <div style="margin-top:10px;color:var(--muted);font-weight:800">· 월요일 시작 · "1일 포함 주 = 그 달 1주" · 주(가로줄) 클릭 → 미리보기</div>`;
+        return html;
+      }
+
+      function updatePreviewText(){
+        const auto=buildAutoTitle(previewRange);
+        document.getElementById("prevText").textContent=`${auto.lab.year}년 ${auto.lab.month+1}월 ${auto.lab.weekNo}주 · ${auto.period.replace("기간: ","")}`;
+      }
+
+      showModal({
+        title:"주 선택",
+        body:renderCalendar(),
+        footer:`<button class="btn" data-act="cancel">취소</button><button class="btn primary" data-act="apply">적용</button>`,
+        onAction:(act)=>{if(act==="apply") applyWeek(previewRange);return true;}
+      });
+
+      function rerender(){
+        modalStack[modalStack.length-1].body=renderCalendar();
+        renderModalTop();
+        setTimeout(()=>{updatePreviewText();bind();},0);
+      }
+
+      function bind(){
+        document.getElementById("btnPrevMon").onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY--;}rerender();};
+        document.getElementById("btnNextMon").onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY++;}rerender();};
+        document.getElementById("btnThisMon").onclick=()=>{const t=new Date();viewY=t.getFullYear();viewM=t.getMonth();rerender();};
+        document.getElementById("btnThisWeek").onclick=()=>{
+          const t=new Date();const dow=(t.getDay()+6)%7;
+          const mon=new Date(t);mon.setDate(t.getDate()-dow);
+          const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+          previewRange={start:mon,end:sun};
+          const bel=calcMonthWeekLabelForRange(mon,sun);viewY=bel.year;viewM=bel.month;
+          rerender();
+        };
+
+        document.querySelectorAll(".weekRow").forEach(row=>{
+          row.addEventListener("click",()=>{
+            const ws=new Date(row.dataset.ws),we=new Date(row.dataset.we);
+            const by=Number(row.dataset.by),bm=Number(row.dataset.bm);
+            if(by!==viewY || bm!==viewM){
+              appAlert("안내","다음 달 1주를 선택하시면 다음 달로 넘어갑니다.");
+              viewY=by;viewM=bm;
+              previewRange={start:ws,end:we};
+              rerender();
+              return;
+            }
+            previewRange={start:ws,end:we};
+            document.querySelectorAll(".weekRow.preview").forEach(x=>x.classList.remove("preview"));
+            row.classList.add("preview");
+            updatePreviewText();
+          });
+        });
+      }
+
+      setTimeout(()=>{updatePreviewText();bind();},0);
+    }
+
+    function setDateLink(on){
+      dateLinkOn=!!on;
+      localStorage.setItem(KEY.dateLink,on?"1":"0");
+      dateLinkState.textContent=on?"ON":"OFF";
+      btnWeekPick.style.display=on?"":"none";
+      if(!on){
+        periodText.style.display="none";
+        setHeaderDates(null);
+        const wk=safeJSON(localStorage.getItem(KEY.week),null);
+        if(wk && wk.autoTitle){localStorage.removeItem(KEY.title);loadTitle();}
+        localStorage.removeItem(KEY.week);
+      }else{
+        openWeekPicker();
+      }
+    }
+    setDateLink(dateLinkOn);
+    btnDateLink.addEventListener("click",()=>setDateLink(!dateLinkOn));
+    btnWeekPick.addEventListener("click",openWeekPicker);
+
+    // restore week on load
+    const wk=safeJSON(localStorage.getItem(KEY.week),null);
+    if(wk && dateLinkOn){
+      const range={start:new Date(wk.start),end:new Date(wk.end)};
+      const auto=buildAutoTitle(range);
+      if(wk.autoTitle) localStorage.setItem(KEY.title,auto.label);
+      loadTitle();
+      periodText.textContent=auto.period;periodText.style.display="";
+      setHeaderDates(range);
+    }
+
+    // Print
+    const btnPrint=document.getElementById("btnPrint");
+    const selPaper=document.getElementById("selPaper");
+    btnPrint.addEventListener("click",()=>{
+      let hideCount=parseInt(localStorage.getItem(KEY.printHideCount)||"0",10);
+      const doPrint=()=>{body.classList.toggle("print-landscape",selPaper.value==="landscape");setTimeout(()=>print(),50);};
+      if(hideCount>0){hideCount--;localStorage.setItem(KEY.printHideCount,String(hideCount));doPrint();return;}
+      appAlert("인쇄 안내","기기/브라우저에 따라 여백, 배율, 배경 그래픽 옵션이 달라 보일 수 있습니다.\n가능하면 배경 그래픽을 켜고, 배율은 '기본/100%'를 권장합니다.",{hide3:true,onOk:doPrint});
+    });
+
+    // Theme picker
+    document.getElementById("btnTheme").addEventListener("click",()=>{
+      const cur=body.getAttribute("data-theme");
+      const rows=THEMES.map(t=>`<button class="btn" data-theme="${t.id}" style="width:100%;text-align:left">${t.id===cur?"✅":"⬜"} ${t.name}</button>`).join("<div style='height:8px'></div>");
+      showModal({title:"색깔 선택",body:`<div style="display:grid;gap:10px">${rows}</div>`,footer:`<button class="btn" data-act="cancel">취소</button>`});
+      setTimeout(()=>modalBody.querySelectorAll("[data-theme]").forEach(b=>b.addEventListener("click",()=>{setTheme(b.getAttribute("data-theme"));closeModal();})),0);
+    });
+
+    // Backups
+    const btnBackups=document.getElementById("btnBackups");
+    const btnManualSave=document.getElementById("btnManualSave");
+
+    function getAppState(){
+      return {v:2,theme:body.getAttribute("data-theme"),title:localStorage.getItem(KEY.title)||"",dateLink:localStorage.getItem(KEY.dateLink)||"0",week:localStorage.getItem(KEY.week)||"",cells:cellData,backups:safeJSON(localStorage.getItem(KEY.backups),[]),autoBackupOn:localStorage.getItem(KEY.autoBackupOn)||"0"};
+    }
+    const loadBackups=()=>safeJSON(localStorage.getItem(KEY.backups),[]);
+    const saveBackups=list=>localStorage.setItem(KEY.backups,JSON.stringify(list));
+
+    function addBackup(kind){
+      const item={id:crypto.randomUUID(),kind,ts:new Date().toISOString(),state:getAppState()};
+      const list=loadBackups();list.unshift(item);
+      const cut=Date.now()-5*60*1000;
+      const filtered=list.filter(x=>x.kind!=="auto" || new Date(x.ts).getTime()>=cut).slice(0,60);
+      saveBackups(filtered);
+    }
+    function purgeAutos(){
+      const list=loadBackups();const cut=Date.now()-5*60*1000;
+      const filtered=list.filter(x=>x.kind!=="auto" || new Date(x.ts).getTime()>=cut);
+      if(filtered.length!==list.length) saveBackups(filtered);
+    }
+
+    function renderBackupUI(){
+      const autoOn=(localStorage.getItem(KEY.autoBackupOn)==="1");
+      const list=loadBackups();
+      const items=list.length?list.map(x=>{
+        const label=`(${x.kind==="auto"?"자동":"수동"}) ${fmtTS(new Date(x.ts))}`;
+        const dotCls=x.kind==="auto"?"dot":"dot manual";
+        return `<div class="backupItem">
+          <div class="backupMeta"><span class="${dotCls}"></span><div class="backupText">${label}</div></div>
+          <div class="backupBtns"><button class="btn" data-restore="${x.id}">복원</button><button class="btn danger" data-del="${x.id}">삭제</button></div>
+        </div>`;
+      }).join(""):`<div style="padding:14px;color:var(--muted);font-weight:900">백업이 없습니다.</div>`;
+
+      showModal({
+        title:"백업",
+        body:`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div style="font-weight:950">자동 백업 (1분마다 저장 · 5분 후 자동 삭제)</div>
+                <div><span class="toggle" id="autoToggle" data-on="${autoOn?1:0}"></span></div>
+              </div>
+              <div style="height:12px"></div>
+              <div class="backupList">${items}</div>`,
+        footer:`<button class="btn" data-act="cancel">닫기</button>`
+      });
+
+      setTimeout(()=>{
+        const t=document.getElementById("autoToggle");
+        t.addEventListener("click",()=>{
+          const on=t.getAttribute("data-on")==="1";
+          t.setAttribute("data-on",on?"0":"1");
+          localStorage.setItem(KEY.autoBackupOn,on?"0":"1");
+        });
+        modalBody.querySelectorAll("[data-restore]").forEach(b=>b.addEventListener("click",()=>{
+          const id=b.getAttribute("data-restore");
+          appConfirm("복원","이 백업으로 복원하시겠습니까? 현재 내용은 덮어쓰기 됩니다.",{onOk:()=>{
+            const item=loadBackups().find(x=>x.id===id); if(!item) return;
+            const st=item.state;
+            setTheme(st.theme||"violetblue");
+            localStorage.setItem(KEY.title,st.title||"");
+            localStorage.setItem(KEY.dateLink,st.dateLink||"0");
+            if(st.week) localStorage.setItem(KEY.week,st.week); else localStorage.removeItem(KEY.week);
+            cellData=st.cells||{}; saveCells(); loadTitle();
+            setDateLink(localStorage.getItem(KEY.dateLink)==="1");
+            renderRows();
+            appAlert("완료","복원이 완료되었습니다.");
+          }});
+        }));
+        modalBody.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{
+          const id=b.getAttribute("data-del");
+          appConfirm("삭제","이 백업을 삭제할까요?",{onOk:()=>{
+            saveBackups(loadBackups().filter(x=>x.id!==id));
+            closeModal(); renderBackupUI();
+          }});
+        }));
+      },0);
+    }
+
+    btnBackups.addEventListener("click",renderBackupUI);
+    btnManualSave.addEventListener("click",()=>{addBackup("manual");appAlert("저장","수동 저장이 완료되었습니다.");});
+    setInterval(()=>{if(localStorage.getItem(KEY.autoBackupOn)==="1") addBackup("auto"); purgeAutos();},60*1000);
+    purgeAutos();
+
+    // Export/Import
+    document.getElementById("btnExport").addEventListener("click",()=>{
+      appConfirm("내보내기","현재 데이터를 JSON으로 내보내시겠습니까?",{onOk:()=>{
+        const blob=new Blob([JSON.stringify(getAppState(),null,2)],{type:"application/json"});
+        const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="pwp7_export.json";a.click();
+      }});
+    });
+    document.getElementById("btnImport").addEventListener("click",()=>{
+      appConfirm("가져오기","JSON 데이터를 가져오면 현재 내용이 덮어쓰기 됩니다. 진행할까요?",{onOk:()=>{
+        const inp=document.createElement("input");inp.type="file";inp.accept="application/json";
+        inp.onchange=async()=>{const f=inp.files?.[0]; if(!f) return;
+          const obj=safeJSON(await f.text(),null);
+          if(!obj||!obj.cells){appAlert("오류","파일 형식이 올바르지 않습니다.");return;}
+          setTheme(obj.theme||"violetblue");
+          localStorage.setItem(KEY.title,obj.title||"");
+          localStorage.setItem(KEY.dateLink,obj.dateLink||"0");
+          if(obj.week) localStorage.setItem(KEY.week,obj.week); else localStorage.removeItem(KEY.week);
+          cellData=obj.cells||{}; saveCells(); loadTitle();
+          setDateLink(localStorage.getItem(KEY.dateLink)==="1");
+          renderRows();
+          appAlert("완료","가져오기가 완료되었습니다.");
+        };
+        inp.click();
+      }});
+    });
+
+    // Download (fix: 전체 프로그램은 바로 파일 선택 화면 / html이면 파비콘 질문)
+    const btnDownload=document.getElementById("btnDownload");
+    const getDlPrefs=()=>safeJSON(localStorage.getItem(KEY.dlPrefs),{name:"pwp7",ext:".html",program:false,files:{html:true,ico:false,png:false},pack:"zip"});
+    const setDlPrefs=p=>localStorage.setItem(KEY.dlPrefs,JSON.stringify(p));
+    const downloadBlob=(blob,filename)=>{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click();};
+    const buildIndexHtml=()=> "<!doctype html>\n"+document.documentElement.outerHTML;
+
+    function openFilePickerModal(prefs){
+      showModal({
+        title:"다운로드 받는 파일 선택",
+        body:`<div style="display:grid;gap:10px">
+                <label class="chip" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="chkHtml" checked disabled> <b>index.html</b></span><span style="color:var(--muted);font-weight:800">필수</span></label>
+                <label class="chip" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="chkIco" ${prefs.files.ico?"checked":""}> <b>파비콘 .ico</b></span><span style="color:var(--muted);font-weight:800">선택</span></label>
+                <label class="chip" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="chkPng" ${prefs.files.png?"checked":""}> <b>파비콘 .png</b></span><span style="color:var(--muted);font-weight:800">선택</span></label>
+                <div style="height:6px"></div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                  <label class="chip"><input type="radio" name="pack" value="zip" ${prefs.pack==="zip"?"checked":""}> zip으로 받기</label>
+                  <label class="chip"><input type="radio" name="pack" value="separate" ${prefs.pack==="separate"?"checked":""}> 따로 받기</label>
+                </div>
+              </div>
+              <div style="margin-top:12px;color:var(--muted);font-weight:800">향후 존재 파일 형식 검토, 파일 형식 드롭다운, 더 많은 파일 형식 다운로드를 지원할 예정입니다.</div>`,
+        footer:`<button class="btn" data-act="cancel">취소</button><button class="btn primary" data-act="dl">다운로드</button>`,
+        onAction:(act)=>{
+          if(act!=="dl") return true;
+          prefs.files.ico=document.getElementById("chkIco").checked;
+          prefs.files.png=document.getElementById("chkPng").checked;
+          prefs.pack=modalBody.querySelector("input[name='pack']:checked")?.value||"zip";
+          setDlPrefs(prefs);
+          // 현재: html만 실제 다운로드. 파비콘은 레포 파일 사용 권장(여기선 다운로드 생략)
+          downloadBlob(new Blob([buildIndexHtml()],{type:"text/html"}),`${prefs.name}.html`);
+          if(prefs.files.ico||prefs.files.png){
+            appAlert("안내","파비콘 파일은 현재 페이지에서 자동 추출 다운로드는 생략했습니다.\n레포에 있는 ico/png 파일을 그대로 사용해 주세요.");
+          }
+          return true;
+        }
+      });
+    }
+
+    btnDownload.addEventListener("click",()=>{
+      const prefs=getDlPrefs();
+      const extVal=prefs.program?".":(prefs.ext||".html");
+      showModal({
+        title:"다운로드",
+        body:`<div style="display:flex;gap:10px;align-items:center">
+               <input class="input" id="dlName" style="flex:1" value="${escapeHtml(prefs.name)}">
+               <input class="input" id="dlExt" style="width:120px" value="${escapeHtml(extVal)}" ${prefs.program?"disabled style='opacity:.55'":""}>
+             </div>
+             <div class="hintRow" style="margin-top:8px"><span>파일 제목(왼쪽) / 파일 형식(오른쪽)</span></div>
+             <div style="height:10px"></div>
+             <label class="chip" style="justify-content:space-between;width:100%">
+               <span style="display:flex;align-items:center;gap:10px"><b>전체 프로그램 다운로드</b><span style="color:var(--muted);font-weight:800">(ico/png/html 선택)</span></span>
+               <span class="toggle" id="dlProgram" data-on="${prefs.program?1:0}"></span>
+             </label>
+             <div style="margin-top:12px;color:var(--muted);font-weight:800">향후 존재 파일 형식 검토, 파일 형식 드롭다운, 더 많은 파일 형식 다운로드를 지원할 예정입니다.</div>`,
+        footer:`<button class="btn" data-act="cancel">취소</button><button class="btn primary" id="btnDoDL" style="opacity:.45;pointer-events:none">다운로드</button>`,
+        onAction:()=>true
+      });
+
+      setTimeout(()=>{
+        const name=document.getElementById("dlName");
+        const ext=document.getElementById("dlExt");
+        const tog=document.getElementById("dlProgram");
+        const btn=document.getElementById("btnDoDL");
+
+        function sync(){
+          const nameOk=!!name.value.trim();
+          const extOk=prefs.program?true:!!ext.value.trim();
+          btn.style.opacity=(nameOk&&extOk)?"1":"0.45";
+          btn.style.pointerEvents=(nameOk&&extOk)?"auto":"none";
+        }
+        function savePrefs(){
+          prefs.name=name.value.trim()||"pwp7";
+          prefs.ext=ext.value.trim()||".html";
+          setDlPrefs(prefs);
+          sync();
+        }
+        name.addEventListener("input",savePrefs);
+        ext.addEventListener("input",savePrefs);
+
+        tog.addEventListener("click",()=>{
+          const on=tog.getAttribute("data-on")==="1";
+          const next=!on;
+          tog.setAttribute("data-on",next?"1":"0");
+          prefs.program=next;
+          if(next){ext.value=".";ext.disabled=true;ext.style.opacity=".55";}
+          else{ext.disabled=false;ext.style.opacity="1";ext.value=prefs.ext||".html";}
+          savePrefs();
+        });
+
+        btn.addEventListener("click",()=>{
+          prefs.name=name.value.trim()||"pwp7";
+          prefs.ext=ext.value.trim()||".html";
+          setDlPrefs(prefs);
+
+          if(prefs.program){
+            prefs.files=prefs.files||{html:true,ico:false,png:false};
+            closeModal();
+            openFilePickerModal(prefs);
+            return;
+          }
+
+          if((prefs.ext||"").trim()!==".html"){appAlert("안내",".html만 현재 이용이 가능합니다.");return;}
+
+          appConfirm("파비콘 다운로드","파비콘 ico와 png도 다운받으시겠습니까?\n확인을 누르시면 프로그램 다운 팝업으로 이동됩니다.",{
+            onOk:()=>{
+              closeModal();
+              prefs.files={html:true,ico:true,png:true};
+              openFilePickerModal(prefs);
+            },
+            onCancel:()=>{
+              appConfirm("다운로드 확인",`${prefs.name}${prefs.ext}을(를) 다운로드 하시겠습니까?`,{onOk:()=>{
+                downloadBlob(new Blob([buildIndexHtml()],{type:"text/html"}),`${prefs.name}.html`);
+              }});
+            }
+          });
+        });
+
+        sync();
+      },0);
+    });
+
+    // Joy
+    const btnJoy=document.getElementById("btnJoy");
+    const joy=document.getElementById("joy");
+    document.getElementById("joyExit").addEventListener("click",()=>{joy.style.display="none";btnJoy.style.display="";});
+    document.getElementById("joyClearSel").addEventListener("click",clearSel);
+    btnJoy.addEventListener("click",()=>{joy.style.display="block";btnJoy.style.display="none";selected.active=true;refreshSelection();});
+    joy.querySelectorAll("[data-move]").forEach(b=>b.addEventListener("click",()=>{
+      const m=b.getAttribute("data-move");
+      if(m==="up") moveSel(-1,0);
+      if(m==="down") moveSel(1,0);
+      if(m==="left") moveSel(0,-1);
+      if(m==="right") moveSel(0,1);
+    }));
+    joy.querySelector("[data-act='open']").addEventListener("click",()=>{if(selected.active) openCellEditor(selected.r,selected.c);});
+
+    // Beta (minimal: info + hub; applang not stuck running)
+    const betaToggle=document.getElementById("betaToggle");
+    const betaInfo=document.getElementById("betaInfo");
+    function setBeta(on){betaToggle.setAttribute("data-on",on?"1":"0");localStorage.setItem(KEY.betaOn,on?"1":"0");if(on) openBetaHub();}
+    setBeta(localStorage.getItem(KEY.betaOn)==="1");
+    betaToggle.addEventListener("click",()=>{const on=betaToggle.getAttribute("data-on")==="1";setBeta(!on);});
+    betaInfo.addEventListener("click",()=>appAlert("Beta버전 안내","Beta버전에서는 아직 도입되지 않은 시험 기능을 사용하실 수 있습니다.\n다만 불안정할 수 있으며, 언제든지 스위치를 꺼서 정식 버전으로 돌아가실 수 있습니다."));
+    function betaName(id){return {timefmt:"앱 24H/12H 형식전환",applang:"앱 언어 설정",shortcuts:"나만의 단축키",mode:"PC/모바일 모드 나누기"}[id]||id;}
+    function openBetaHub(){
+      const running=safeJSON(localStorage.getItem(KEY.betaRunning),{});
+      const items=[{id:"timefmt",name:betaName("timefmt")},{id:"applang",name:betaName("applang")},{id:"shortcuts",name:betaName("shortcuts")},{id:"mode",name:betaName("mode")}];
+      const list=items.map(it=>{
+        const forceNonRunning=(it.id==="applang"||it.id==="shortcuts");
+        const isRun=forceNonRunning?false:!!running[it.id];
+        return `<div class="backupItem" style="justify-content:space-between">
+          <div class="backupMeta"><div class="backupText">${it.name}</div></div>
+          <button class="btn primary" data-beta="${it.id}" data-state="${isRun?"stop":"run"}" style="display:flex;align-items:center;gap:10px">
+            ${isRun
+              ? `<span class="iconBtn" style="border-color:#ef4444;color:#ef4444;background:color-mix(in srgb,#fee2e2 65%,white)"><svg viewBox="0 0 24 24" fill="#ef4444"><rect x="7" y="7" width="10" height="10" rx="2"/></svg></span><span style="font-weight:950;color:#ef4444">정지</span>`
+              : `<span class="iconBtn" style="border-color:#2563eb;color:#2563eb;background:color-mix(in srgb,#dbeafe 65%,white)"><svg viewBox="0 0 24 24" fill="#2563eb"><path d="M9 7l10 5-10 5V7z"/></svg></span><span style="font-weight:950;color:#2563eb">실행</span>`}
+          </button>
+        </div>`;
+      }).join("");
+      showModal({title:"Beta 추가기능",body:`<div style="display:grid;gap:10px">${list}</div>`,footer:`<button class="btn" data-act="cancel">닫기</button>`});
+      setTimeout(()=>{
+        modalBody.querySelectorAll("[data-beta]").forEach(b=>b.addEventListener("click",()=>{
+          const id=b.getAttribute("data-beta");
+          const state=b.getAttribute("data-state");
+          if(state==="stop"){
+            appConfirm("정지",`정말 ${betaName(id)} 기능을 정지하시겠습니까?`,{onOk:()=>{
+              const run=safeJSON(localStorage.getItem(KEY.betaRunning),{});delete run[id];localStorage.setItem(KEY.betaRunning,JSON.stringify(run));
+              closeModal();openBetaHub();
+            }});
+            return;
+          }
+          appConfirm("실행",`${betaName(id)} 기능을 사용하시겠습니까?`,{onOk:()=>{
+            if(id==="shortcuts"){appAlert("준비중","지금은 준비중입니다.");return;}
+            if(id==="applang"){appAlert("안내","이 기능은 설정 UI만 준비 중입니다.");return;}
+            if(id==="timefmt"){appAlert("안내","이 기능은 설정 UI만 준비 중입니다.");return;}
+            if(id==="mode"){appAlert("안내","이 기능은 설정 UI만 준비 중입니다.");return;}
+          }});
+        }));
+      },0);
+    }
+
+    // Reset
+    document.getElementById("btnResetAll").addEventListener("click",()=>{
+      appConfirm("경고","정말 전체 초기화 하시겠습니까? (모든 내용/설정/백업이 삭제됩니다)",{onOk:()=>{
+        Object.values(KEY).forEach(k=>localStorage.removeItem(k));
+        cellData={};setTheme("violetblue");loadTitle();setDateLink(false);renderRows();
+        appAlert("완료","초기화가 완료되었습니다.");
+      }});
+    });
+  </script>
+</body>
+</html>
