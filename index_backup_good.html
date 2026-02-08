@@ -1,0 +1,3479 @@
+<!DOCTYPE html>
+<html lang="ko" data-paper="portrait" data-mode="auto" data-beta="off">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>파스텔톤 주간 플래너</title>
+
+  <!-- FAVICON (같은 폴더 기준) -->
+  <link rel="icon" href="./PWP7_favicon_ultra.ico" sizes="any">
+  <link rel="icon" type="image/png" href="./PWP7_favicon_ultra.png">
+
+  <style>
+    :root{
+      --bg:#eef6ff;
+      --border:#bcd3f5;
+      --header:#d9e8ff;
+      --timebg:#f4f9ff;
+      --text:#111;
+
+      --sat:#1565c0;
+      --sun:#c62828;
+
+      --timeW:110px;
+      --dayW:140px;
+      --rowH:36px;
+
+      --paper: portrait;
+      --printMargin: 5mm;
+
+      --sel:#111;
+      --selGlow: color-mix(in srgb, var(--border) 55%, transparent 45%);
+
+      --blue:#2563eb;
+      --green:#16a34a;
+      --red:#dc2626;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: "Malgun Gothic", Arial, sans-serif;
+      color:var(--text);
+      background: var(--bg);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ===== appbar ===== */
+    .appbar{
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      backdrop-filter: blur(10px);
+      background: color-mix(in srgb, var(--bg) 78%, white 22%);
+      border-bottom: 1px solid var(--border);
+    }
+    .appbar-inner{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 10px 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap: wrap;
+    }
+    .left, .right{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+    .brand{
+      font-weight: 1000;
+      font-size: 15px;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+      cursor: default;
+    }
+    .hint{
+      font-size: 12px;
+      opacity: 0.72;
+      white-space: nowrap;
+    }
+
+    .btn, .select{
+      border: 1px solid var(--border);
+      background: white;
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-weight: 900;
+      font-size: 13px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn:hover{ opacity: .97; }
+    .btn:active{ transform: scale(.99); }
+    .btn.ghost{
+      background: transparent;
+      border: 1px dashed var(--border);
+    }
+    .btn.danger{
+      border-color: #ff6b6b;
+      color: #b00020;
+      background: #fff5f5;
+    }
+    .btn.danger:hover{ background:#ffecec; }
+    .btn.primary{
+      border-color: color-mix(in srgb, var(--border) 55%, var(--blue) 45%);
+      background: color-mix(in srgb, white 85%, var(--header) 15%);
+    }
+
+    .btn.disabled{
+      opacity: .45;
+      cursor:not-allowed;
+      pointer-events:none;
+    }
+
+    /* pretty switch */
+    .switch{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, white 70%, var(--bg) 30%);
+      font-weight: 900;
+      font-size: 13px;
+      user-select:none;
+      cursor:pointer;
+    }
+    .switch input{ display:none; }
+    .track{
+      width: 38px; height: 22px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      position: relative;
+      flex: 0 0 auto;
+    }
+    .knob{
+      width: 18px; height: 18px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--border) 55%, #fff 45%);
+      position:absolute;
+      top: 1px; left: 1px;
+      transition: left .18s ease, background .18s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    }
+    .switch.on .track{ background: color-mix(in srgb, var(--header) 65%, #fff 35%); }
+    .switch.on .knob{
+      left: 19px;
+      background: color-mix(in srgb, var(--border) 85%, #fff 15%);
+    }
+
+    /* beta label */
+    .betaLabel{
+      font-weight: 700;
+      font-style: italic;
+      color: var(--blue);
+      opacity: .95;
+      letter-spacing: -0.2px;
+    }
+    .iBtn{
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+      cursor:pointer;
+      user-select:none;
+    }
+    .iBtn:hover{ opacity:.95; }
+    .iBtn::before{ content:"i"; font-family: Arial, sans-serif; }
+
+    /* ===== layout ===== */
+    .wrap{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 14px 12px 30px;
+    }
+    .card{
+      background: color-mix(in srgb, var(--bg) 75%, #fff 25%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .title-row{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .titleBox{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 1000;
+      font-size: 18px;
+      letter-spacing: -0.2px;
+      cursor:pointer;
+      user-select:none;
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
+    }
+    .titleBox:hover{ opacity:.97; }
+    .titleSub{
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 900;
+      opacity: .75;
+      min-height: 14px;
+    }
+
+    .table-wrap{
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    table.planner{
+      width: 100%;
+      min-width: 860px;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background:#fff;
+      border: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    col.timecol{ width: var(--timeW); }
+    col.daycol{ width: var(--dayW); }
+
+    .planner th, .planner td{
+      border: 1px solid var(--border);
+      text-align: center;
+      vertical-align: middle;
+      height: var(--rowH);
+      padding: 6px 6px;
+      font-size: 14px;
+    }
+
+    /* right-most vertical line must exist */
+    .planner tr > *:last-child{
+      border-right: 1px solid var(--border) !important;
+    }
+
+    .planner thead th{
+      background: var(--header);
+      font-weight: 900;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .planner td.time{
+      background: var(--timebg);
+      font-weight: 900;
+      position: sticky;
+      left: 0;
+      z-index: 4;
+      white-space: nowrap;
+    }
+
+    /* corner diagonal */
+    .planner th.corner{
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 6;
+      padding: 0;
+      background: var(--header);
+      min-height: 44px;
+    }
+    .cornerBox{
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .cornerBox::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(135deg,
+          transparent 49.7%,
+          color-mix(in srgb, var(--border) 92%, #fff 8%) 50%,
+          transparent 50.3%);
+      pointer-events:none;
+    }
+    .cornerTime{
+      position:absolute;
+      left: 10px;
+      bottom: 6px;
+      font-weight: 1000;
+      font-size: 13px;
+    }
+    .cornerDay{
+      position:absolute;
+      right: 10px;
+      top: 6px;
+      font-weight: 1000;
+      font-size: 13px;
+    }
+
+    /* header day + date */
+    .dow{
+      display:flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.05;
+      align-items:center;
+      justify-content:center;
+      min-height: 36px;
+    }
+    .dow .name{ font-weight: 1000; }
+    .dow .date{
+      font-size: 11px;
+      opacity: .7;
+      font-weight: 1000;
+      min-height: 12px;
+    }
+    .no-date .dow{ justify-content:center; }
+    .no-date .dow .date{ display:none; }
+
+    .sat .name, .sat .date{ color: var(--sat); opacity: .95; }
+    .sun .name, .sun .date{ color: var(--sun); opacity: .95; }
+
+    /* cell */
+    .planner td.cell{
+      cursor: pointer;
+      text-align: left;
+      padding: 6px 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: #fff;
+      position: relative;
+    }
+    .planner td.cell:hover{
+      background: color-mix(in srgb, var(--header) 18%, white 82%);
+    }
+    .planner td.cell.empty::before{
+      content: "클릭해서 입력";
+      opacity: .25;
+    }
+
+    /* expand */
+    .planner td.cell.expanded{
+      white-space: pre-wrap;
+      overflow: visible;
+      text-overflow: clip;
+    }
+    .expander{
+      position:absolute;
+      right: 6px;
+      bottom: 6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 8px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      opacity:.92;
+    }
+    .planner td.cell.hasMore .expander{ display:flex; }
+    .planner td.cell.hasMore:not(.expanded) .expander::before{ content:"▾"; }
+    .planner td.cell.hasMore.expanded .expander::before{ content:"▴"; }
+
+    /* selected cell */
+    .planner td.cell.selected{
+      outline: 2px solid var(--sel);
+      outline-offset: -2px;
+      box-shadow: 0 0 0 4px var(--selGlow) inset;
+    }
+
+    /* ===== tooltip preview (PC hover only) ===== */
+    .tooltip{
+      position: fixed;
+      z-index: 9999;
+      max-width: min(520px, calc(100vw - 28px));
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 14px 45px rgba(0,0,0,.22);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-weight: 900;
+      font-size: 13px;
+      display:none;
+      pointer-events:none;
+    }
+    .tooltip .meta{
+      font-size: 11px;
+      opacity:.7;
+      font-weight: 1000;
+      margin-bottom: 6px;
+    }
+
+    /* ===== modal common ===== */
+    .backdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index: 100;
+      padding: 14px;
+    }
+    .modal{
+      width: min(820px, 100%);
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 60px rgba(0,0,0,.25);
+      overflow: hidden;
+    }
+    .modal-header{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      background: color-mix(in srgb, var(--bg) 75%, #fff 25%);
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title{
+      font-weight: 1000;
+      font-size: 14px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+    .pill{
+      display:inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 1000;
+      opacity: .92;
+    }
+    .pill.soft{
+      background: color-mix(in srgb, var(--header) 25%, #fff 75%);
+    }
+    .modal-body{ padding: 12px; }
+    .modal-actions{
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    textarea, input[type="text"]{
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 10px;
+      font-size: 14px;
+      line-height: 1.4;
+      outline: none;
+      font-weight: 900;
+    }
+    textarea{ min-height: 120px; resize: vertical; }
+    textarea:focus, input[type="text"]:focus{
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--border) 50%, transparent 50%);
+    }
+
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 140px;
+      gap: 10px;
+      align-items: center;
+    }
+    .muted{
+      font-size: 12px;
+      opacity: .75;
+      font-weight: 900;
+      line-height: 1.5;
+    }
+
+    /* custom radio/checkbox */
+    .chkRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      cursor:pointer;
+      user-select:none;
+    }
+    .dot{
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      border: 2px solid var(--border);
+      background: transparent;
+      flex: 0 0 auto;
+    }
+    .dot.fill{ border-color: transparent; background: var(--blue); }
+    .dot.green{ background: var(--green); }
+    .dot.blue{ background: var(--blue); }
+    .dot.red{ background: var(--red); }
+    .dot.gray{ background: #9ca3af; }
+    .chkLabel{
+      font-weight: 1000;
+      font-size: 13px;
+      flex: 1 1 auto;
+    }
+    .smallRight{
+      font-size: 12px;
+      font-weight: 1000;
+      opacity: .7;
+    }
+
+    /* ===== calendar ===== */
+    .cal-head{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .cal-head .nav{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+    .cal-grid{
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow:hidden;
+    }
+    .cal-dow{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+    .cal-dow div{
+      background: color-mix(in srgb, var(--header) 75%, #fff 25%);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 6px;
+      text-align:center;
+      font-weight: 1000;
+      font-size: 13px;
+    }
+    .cal-dow .sat{ color: var(--sat); }
+    .cal-dow .sun{ color: var(--sun); }
+
+    .cal-week{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      border-bottom: 1px solid var(--border);
+      cursor:pointer;
+      background:#fff;
+      transition: background .12s ease, transform .12s ease;
+    }
+    .cal-week:last-child{ border-bottom:none; }
+    .cal-week:hover{
+      background: color-mix(in srgb, var(--header) 18%, #fff 82%);
+      transform: translateY(-1px);
+    }
+    .cal-week.selected{
+      outline: 3px solid color-mix(in srgb, var(--border) 60%, #fff 40%);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .cal-cell{
+      padding: 10px 6px;
+      text-align:center;
+      border-right: 1px solid var(--border);
+      font-weight: 900;
+      min-height: 44px;
+      display:flex;
+      flex-direction: column;
+      justify-content:center;
+      gap:2px;
+    }
+    .cal-cell:last-child{ border-right:none; }
+    .cal-cell .d{ font-size: 14px; }
+    .cal-cell .m{ font-size: 11px; opacity: .7; font-weight: 1000; }
+    .cal-cell.out{ opacity: .35; }
+    .cal-cell.sat{ color: var(--sat); }
+    .cal-cell.sun{ color: var(--sun); }
+
+    /* ===== joystick overlay (only after run) ===== */
+    .joyOverlay{
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      z-index: 85;
+      width: 200px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, #fff 90%, var(--bg) 10%);
+      box-shadow: 0 18px 45px rgba(0,0,0,.22);
+      padding: 10px;
+      display:none;
+      user-select:none;
+    }
+    .joyTitle{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      margin-bottom: 8px;
+    }
+    .joyTitle b{ font-weight: 1000; font-size: 13px; }
+    .joyGrid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      align-items:center;
+      justify-items:center;
+    }
+    .joyBtn{
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 1000;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .joyBtn:active{ transform: scale(.98); }
+    .joyWide{
+      margin-top: 8px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .joyWide button{
+      width: 100%;
+      border-radius: 14px;
+      padding: 10px 8px;
+      border: 1px solid var(--border);
+      background:#fff;
+      font-weight: 1000;
+      cursor:pointer;
+    }
+    .joyWide button:active{ transform: scale(.99); }
+
+    /* show joystick run button on touch devices more reliably */
+    @media (pointer: coarse){
+      .hint{ display:none; }
+    }
+
+    /* ===== backup list ===== */
+    .backupList{
+      display:flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: min(52vh, 420px);
+      overflow:auto;
+      padding-right: 4px;
+    }
+    .backupItem{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding: 10px 10px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background:#fff;
+    }
+    .backupItem .meta{
+      flex: 1 1 auto;
+      display:flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .backupItem .meta .line1{
+      font-weight: 1000;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .backupItem .meta .line2{
+      font-size: 12px;
+      opacity: .7;
+      font-weight: 1000;
+    }
+    .backupItem .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+    .miniBtn{
+      border: 1px solid var(--border);
+      background:#fff;
+      padding: 7px 10px;
+      border-radius: 12px;
+      font-weight: 1000;
+      cursor:pointer;
+      font-size: 12px;
+    }
+    .miniBtn:active{ transform: scale(.99); }
+    .miniBtn.restore{
+      border-color: color-mix(in srgb, var(--border) 50%, var(--blue) 50%);
+    }
+    .miniBtn.del{
+      border-color: color-mix(in srgb, var(--border) 50%, var(--red) 50%);
+      color: #b00020;
+      background: #fff5f5;
+    }
+
+    /* ===== beta features list ===== */
+    .featureList{
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .featureRow{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background:#fff;
+    }
+    .featureRow .name{
+      font-weight: 1000;
+      font-size: 14px;
+      flex: 1 1 auto;
+    }
+    .featureRow .rightCtl{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex: 0 0 auto;
+    }
+    .statusIcon{
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 2px solid color-mix(in srgb, var(--blue) 55%, var(--border) 45%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 8px 20px rgba(0,0,0,.12);
+    }
+    .statusIcon.stop{
+      border-color: color-mix(in srgb, var(--red) 55%, var(--border) 45%);
+      background: var(--red);
+    }
+    .statusIcon::before{ content:"▶"; font-size: 12px; transform: translateX(1px); }
+    .statusIcon.stop::before{ content:"■"; font-size: 12px; transform:none; }
+    .runStopLabel{
+      font-weight: 1000;
+      color: var(--blue);
+    }
+    .runStopLabel.stop{
+      color: var(--red);
+    }
+
+    /* ===== PRINT ===== */
+    @media print{
+      body{
+        background:#fff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      @page{
+        size: A4 var(--paper);
+        margin: var(--printMargin);
+      }
+
+      .appbar, .tooltip, .joyOverlay, .backdrop{ display:none !important; }
+      .wrap{ max-width: none; padding: 0; margin: 0; }
+      .card{ border:none; border-radius:0; padding:0; background:#fff; }
+      .table-wrap{ overflow: visible !important; border-radius:0; }
+      table.planner{ min-width: 0 !important; width: 100% !important; border-radius: 0; }
+
+      /* sticky off */
+      .planner thead th,
+      .planner td.time,
+      .planner th.corner{
+        position: static !important;
+      }
+
+      /* keep 1-page safety */
+      html[data-paper="portrait"]{ --rowH: 26px; }
+      html[data-paper="landscape"]{ --rowH: 22px; }
+
+      .planner th, .planner td{
+        padding: 4px 5px !important;
+        font-size: 12px !important;
+      }
+      .dow .date{ font-size: 10px !important; }
+      .cornerTime, .cornerDay{ font-size: 12px !important; }
+
+      /* print = one-line only */
+      .planner td.cell{
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+      .expander{ display:none !important; }
+      .planner td.cell.selected{ outline: none !important; box-shadow:none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="appbar">
+    <div class="appbar-inner">
+      <div class="left">
+        <div class="brand" id="brandText">파스텔톤 주간 플래너</div>
+        <div class="hint" id="hintText">Ctrl+Enter 저장 · 방향키 이동 · 조이스틱 실행 가능</div>
+
+        <button class="btn" id="noticeBtn" type="button">공지</button>
+
+        <select class="select" id="themeSelect" title="테마">
+          <option value="pink">분홍</option>
+          <option value="peach">연주황</option>
+          <option value="lemon">연노랑</option>
+          <option value="mint">민트</option>
+          <option value="lblue" selected>라이트 블루</option>
+          <option value="violet">바이올렛</option>
+          <option value="ivory">아이보리</option>
+        </select>
+
+        <label class="switch" id="dateSwitch" title="날짜 연동(달력에서 주 선택)">
+          <span class="track"><span class="knob"></span></span>
+          <span id="dateSwitchText">날짜 연동</span>
+          <input type="checkbox" id="dateLinkToggle" />
+        </label>
+
+        <button class="btn" id="pickWeekBtn" type="button">주 선택</button>
+
+        <label class="switch" id="backupSwitch" title="자동 백업(1분마다 저장, 5분 지난 건 자동 삭제)">
+          <span class="track"><span class="knob"></span></span>
+          <span id="backupSwitchText">자동 백업</span>
+          <input type="checkbox" id="backupToggle" />
+        </label>
+
+        <button class="btn" id="manualSaveBtn" type="button">수동 저장</button>
+        <button class="btn" id="backupListBtn" type="button">백업 리스트</button>
+
+        <!-- Beta -->
+        <label class="switch" id="betaSwitch" title="Beta 버전">
+          <span class="track"><span class="knob"></span></span>
+          <span class="betaLabel">Beta버전</span>
+          <input type="checkbox" id="betaToggle" />
+        </label>
+        <span class="iBtn" id="betaInfoBtn" title="Beta 안내"></span>
+        <button class="btn" id="betaFeaturesBtn" type="button">Beta 추가기능</button>
+      </div>
+
+      <div class="right">
+        <select class="select" id="orientationSelect" title="인쇄 방향">
+          <option value="portrait">세로(A4)</option>
+          <option value="landscape">가로(A4)</option>
+        </select>
+
+        <button class="btn" id="printBtn" type="button">인쇄</button>
+        <button class="btn" id="downloadBtn" type="button">다운로드</button>
+        <button class="btn" id="exportBtn" type="button">내보내기</button>
+        <button class="btn" id="importBtn" type="button">가져오기</button>
+        <button class="btn ghost" id="resetSizeBtn" type="button">크기 초기화</button>
+        <button class="btn danger" id="resetAllBtn" type="button">전체 초기화</button>
+
+        <button class="btn primary" id="joyRunBtn" type="button">조이스틱 실행</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <div class="title-row">
+        <div>
+          <div class="titleBox" id="titleBox" title="클릭해서 제목 편집">
+            <span id="plannerTitleText">주간 플래너</span>
+            <span class="pill" style="font-size:11px;" id="editPill">편집</span>
+          </div>
+          <div class="titleSub" id="plannerMetaText"></div>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="tableWrap">
+        <table class="planner no-date" id="plannerTable" aria-label="주간 플래너">
+          <colgroup>
+            <col class="timecol" />
+            <col class="daycol" span="7" />
+          </colgroup>
+
+          <thead>
+            <tr>
+              <th class="corner">
+                <div class="cornerBox">
+                  <div class="cornerDay" id="cornerDayText">요일</div>
+                  <div class="cornerTime" id="cornerTimeText">시간</div>
+                </div>
+              </th>
+
+              <th><div class="dow"><div class="name">월</div><div class="date" data-dow="0"></div></div></th>
+              <th><div class="dow"><div class="name">화</div><div class="date" data-dow="1"></div></div></th>
+              <th><div class="dow"><div class="name">수</div><div class="date" data-dow="2"></div></div></th>
+              <th><div class="dow"><div class="name">목</div><div class="date" data-dow="3"></div></div></th>
+              <th><div class="dow"><div class="name">금</div><div class="date" data-dow="4"></div></div></th>
+              <th class="sat"><div class="dow"><div class="name">토</div><div class="date" data-dow="5"></div></div></th>
+              <th class="sun"><div class="dow"><div class="name">일</div><div class="date" data-dow="6"></div></div></th>
+            </tr>
+          </thead>
+
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- tooltip (PC hover preview only) -->
+  <div class="tooltip" id="tooltip">
+    <div class="meta" id="tooltipMeta"></div>
+    <div id="tooltipBody"></div>
+  </div>
+
+  <!-- Joystick overlay -->
+  <div class="joyOverlay" id="joyOverlay" aria-label="조이스틱">
+    <div class="joyTitle">
+      <b id="joyTitleText">셀 선택 조이스틱</b>
+      <span class="pill" id="joyHintPill" style="font-size:11px;">방향 이동 · ⏎ 입력</span>
+    </div>
+    <div class="joyGrid">
+      <div></div>
+      <div class="joyBtn" data-dir="up">▲</div>
+      <div></div>
+
+      <div class="joyBtn" data-dir="left">◀</div>
+      <div class="joyBtn" data-dir="enter">⏎</div>
+      <div class="joyBtn" data-dir="right">▶</div>
+
+      <div></div>
+      <div class="joyBtn" data-dir="down">▼</div>
+      <div></div>
+    </div>
+    <div class="joyWide">
+      <button id="joyDeselectBtn" type="button">셀 선택 해제</button>
+      <button id="joyCloseBtn" type="button">종료</button>
+    </div>
+  </div>
+
+  <!-- ===== App Dialog (central, replaces alert/confirm) ===== -->
+  <div class="backdrop" id="appDialogBackdrop" aria-modal="true" role="dialog">
+    <div class="modal" style="width:min(560px, 100%);">
+      <div class="modal-header">
+        <div class="modal-title" id="appDialogTitle"><span class="pill">알림</span></div>
+        <button class="btn" id="appDialogX" type="button">닫기</button>
+      </div>
+      <div class="modal-body">
+        <div id="appDialogMessage" style="font-weight:900;line-height:1.55;"></div>
+        <div id="appDialogSub" class="muted" style="margin-top:8px; display:none;"></div>
+      </div>
+      <div class="modal-actions" id="appDialogActions"></div>
+    </div>
+  </div>
+
+  <!-- ===== Print Dialog (exception: includes "3회 동안 숨김") ===== -->
+  <div class="backdrop" id="printDialogBackdrop" aria-modal="true" role="dialog">
+    <div class="modal" style="width:min(560px, 100%);">
+      <div class="modal-header">
+        <div class="modal-title"><span class="pill">인쇄 안내</span></div>
+        <button class="btn" id="printDialogX" type="button">닫기</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-weight:900;line-height:1.55;">
+          색상 배경이 그대로 나오려면 인쇄 설정에서 <b>“배경 그래픽(배경색/이미지)”</b>를 켜줘!
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="printHide3Btn" type="button">3회 동안 숨김</button>
+        <button class="btn" id="printProceedBtn" type="button">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Cell Input Modal ===== -->
+  <div class="backdrop" id="cellBackdrop" aria-modal="true" role="dialog">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="pill">내용 입력</span>
+          <span class="pill soft">Enter=줄바꿈 · Ctrl+Enter=저장</span>
+          <span class="pill" id="cellLabel"></span>
+        </div>
+        <button class="btn" id="closeCell" type="button">닫기</button>
+      </div>
+      <div class="modal-body">
+        <textarea id="cellInput" placeholder="내용을 입력해줘 (줄바꿈 가능)"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="clearCellBtn" type="button">비우기</button>
+        <button class="btn" id="saveCellBtn" type="button">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Title Edit Modal ===== -->
+  <div class="backdrop" id="titleBackdrop" aria-modal="true" role="dialog">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title"><span class="pill">제목 편집</span></div>
+        <button class="btn" id="closeTitle" type="button">닫기</button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="titleInput" placeholder="예) 주간 플래너 / 나만의 플래너 ..." />
+        <div class="muted" style="margin-top:8px;">
+          · 비워두면 기본 제목 “주간 플래너”로 표시돼.
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="clearTitleBtn" type="button">제목 비우기</button>
+        <button class="btn" id="saveTitleBtn" type="button">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Calendar Modal (exception buttons: 취소/적용) ===== -->
+  <div class="backdrop" id="calBackdrop" aria-modal="true" role="dialog">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="pill">주 선택</span>
+          <span class="pill" id="calLabel"></span>
+        </div>
+        <button class="btn" id="closeCal" type="button">닫기</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="cal-head">
+          <div class="nav">
+            <button class="btn" id="calPrev" type="button">◀</button>
+            <button class="btn" id="calToday" type="button">이번 달</button>
+            <button class="btn" id="calThisWeek" type="button">이번 주</button>
+            <button class="btn" id="calNext" type="button">▶</button>
+          </div>
+          <span class="pill soft" id="mwBadge">이번 주가 자동 선택됨</span>
+        </div>
+
+        <div class="cal-grid">
+          <div class="cal-dow">
+            <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div>
+            <div class="sat">토</div><div class="sun">일</div>
+          </div>
+          <div id="calWeeks"></div>
+        </div>
+
+        <div class="muted" style="margin-top:10px;">
+          · 월요일 시작 · “1일 포함 주 = 그 달 1주” · 주(가로줄) 클릭 → 미리보기
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn ghost" id="cancelCal" type="button">취소</button>
+        <button class="btn" id="applyCal" type="button">적용</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Notice Modal ===== -->
+  <div class="backdrop" id="noticeBackdrop" aria-modal="true" role="dialog">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title"><span class="pill">공지</span></div>
+        <button class="btn" id="closeNotice" type="button">닫기</button>
+      </div>
+      <div class="modal-body" style="line-height:1.5;font-weight:900;">
+        <div style="margin-bottom:10px;">✅ 현재 버전은 <b>Windows 11</b> 및 <b>Android(Chrome)</b> 환경에 최적화되어 있습니다.</div>
+        <div class="muted">· 인쇄 시 색상 그대로 나오려면 “배경 그래픽(배경색/이미지)”를 켜줘!</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="okNotice" type="button">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Backup List Modal ===== -->
+  <div class="backdrop" id="backupBackdrop" aria-modal="true" role="dialog">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title"><span class="pill">백업 리스트</span></div>
+        <button class="btn" id="closeBackup" type="button">닫기</button>
+      </div>
+      <div class="modal-body">
+        <div class="muted" style="margin-bottom:10px;">
+          · 자동(파랑) / 수동(초록) · 5분이 지나면 자동 백업은 자동 정리돼.
+        </div>
+        <div class="backupList" id="backupList"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="backupPurgeBtn" type="button">정리</button>
+        <button class="btn" id="backupCloseBtn" type="button">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Beta Features Modal ===== -->
+  <div class="backdrop" id="betaBackdrop" aria-modal="true" role="dialog">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title"><span class="pill">Beta 추가기능</span></div>
+        <button class="btn" id="closeBeta" type="button">닫기</button>
+      </div>
+      <div class="modal-body">
+        <div class="featureList" id="featureList"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="betaCloseBtn" type="button">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Beta Feature Config Modal (generic) ===== -->
+  <div class="backdrop" id="betaConfigBackdrop" aria-modal="true" role="dialog">
+    <div class="modal" style="width:min(620px,100%);">
+      <div class="modal-header">
+        <div class="modal-title" id="betaConfigTitle"><span class="pill">설정</span></div>
+        <button class="btn" id="closeBetaConfig" type="button">닫기</button>
+      </div>
+      <div class="modal-body" id="betaConfigBody"></div>
+      <div class="modal-actions" id="betaConfigActions"></div>
+    </div>
+  </div>
+
+  <!-- ===== Download Settings Modal ===== -->
+  <div class="backdrop" id="dlBackdrop" aria-modal="true" role="dialog">
+    <div class="modal" style="width:min(640px, 100%);">
+      <div class="modal-header">
+        <div class="modal-title"><span class="pill">다운로드 설정</span></div>
+        <button class="btn" id="closeDL" type="button">닫기</button>
+      </div>
+      <div class="modal-body">
+        <div class="row2">
+          <input type="text" id="dlTitle" placeholder="파일 제목" />
+          <input type="text" id="dlExt" placeholder=".xxx" />
+        </div>
+
+        <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <label class="switch" id="dlProgramSwitch" title="전체 프로그램 다운로드">
+            <span class="track"><span class="knob"></span></span>
+            <span>전체 프로그램 다운로드</span>
+            <input type="checkbox" id="dlProgramToggle" />
+          </label>
+        </div>
+
+        <div class="muted" style="margin-top:10px;">
+          · 향후 존재 파일 형식 검토, 파일 형식 드롭다운, 더 많은 파일 형식 다운로드를 지원할 예정입니다.
+          <br>· (참고) 향후 “다운로드 허용해주세요” 문구 도입 고려.
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="dlCancelBtn" type="button">취소</button>
+        <button class="btn" id="dlNextBtn" type="button">다운로드</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Program Download Modal (for program switch ON) ===== -->
+  <div class="backdrop" id="progBackdrop" aria-modal="true" role="dialog">
+    <div class="modal" style="width:min(700px, 100%);">
+      <div class="modal-header">
+        <div class="modal-title"><span class="pill">프로그램 다운</span></div>
+        <button class="btn" id="closeProg" type="button">닫기</button>
+      </div>
+      <div class="modal-body">
+        <div class="muted" style="margin-bottom:10px;">
+          · HTML은 기본 체크됩니다. 원하는 파일만 선택해서 받을 수 있어요.
+        </div>
+
+        <div class="featureList">
+          <div class="chkRow" data-prog="html">
+            <span class="dot" id="dotHtml"></span>
+            <div class="chkLabel">index.html</div>
+            <div class="smallRight">필수 추천</div>
+          </div>
+          <div class="chkRow" data-prog="ico">
+            <span class="dot" id="dotIco"></span>
+            <div class="chkLabel">PWP7_favicon_ultra.ico</div>
+            <div class="smallRight">파비콘</div>
+          </div>
+          <div class="chkRow" data-prog="png">
+            <span class="dot" id="dotPng"></span>
+            <div class="chkLabel">PWP7_favicon_ultra.png</div>
+            <div class="smallRight">파비콘</div>
+          </div>
+        </div>
+
+        <div id="multiOptionWrap" style="margin-top:12px; display:none;">
+          <div class="muted" style="margin-bottom:8px;">여러 파일을 선택했어요. 받는 방식을 선택해줘.</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div class="chkRow" id="optZip">
+              <span class="dot" id="dotZip"></span>
+              <div class="chkLabel">ZIP으로 받기</div>
+            </div>
+            <div class="chkRow" id="optSeparate">
+              <span class="dot" id="dotSeparate"></span>
+              <div class="chkLabel">따로 받기</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="progCancelBtn" type="button">취소</button>
+        <button class="btn" id="progDownloadBtn" type="button">다운로드</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 가져오기용 -->
+  <input id="importFile" type="file" accept="application/json" style="display:none;" />
+
+  <script>
+    /***********************
+     * Storage Keys
+     ************************/
+    const K = {
+      data: "planner_data",
+      title: "planner_custom_title",
+      titleAuto: "planner_title_is_auto",
+      dateOn: "planner_date_link_enabled",
+      mw: "planner_monthweek",
+      ori: "planner_print_orientation",
+      theme: "planner_theme",
+      backupOn: "planner_backup_enabled",
+      backups: "planner_backups",
+      betaOn: "planner_beta_on",
+
+      // beta settings
+      tf_enabled: "beta_timefmt_enabled",
+      tf_mode: "beta_timefmt_mode",       // "24" | "12"
+      tf_lang: "beta_timefmt_lang",       // "ko" | "en"
+      app_lang: "beta_app_lang",          // "ko" | "en"
+      mode_enabled: "beta_mode_enabled",
+      mode_value: "beta_mode_value",      // "pc" | "mobile"
+      shortcuts_enabled: "beta_shortcuts_enabled",
+
+      // print hide
+      device_id: "device_id_tmp",
+      print_hide_rem: "print_hide_remaining",
+
+      // download remembered settings
+      dl_settings: "download_settings_v2",
+      prog_settings: "program_download_settings_v2"
+    };
+
+    /***********************
+     * Themes
+     ************************/
+    const THEMES = {
+      pink:   { bg:"#fff4f8", border:"#f2c7d6", header:"#ffe0eb", timebg:"#ffedf4" },
+      peach:  { bg:"#fff5ef", border:"#f0cbb5", header:"#ffe4d6", timebg:"#fff0e7" },
+      lemon:  { bg:"#fffbe8", border:"#e9d9a7", header:"#fff1b8", timebg:"#fff7d6" },
+      mint:   { bg:"#edfff9", border:"#b9e6d6", header:"#d7fff1", timebg:"#f2fffb" },
+      lblue:  { bg:"#eef6ff", border:"#bcd3f5", header:"#d9e8ff", timebg:"#f4f9ff" },
+      violet: { bg:"#f4f0ff", border:"#cbbdf2", header:"#e7ddff", timebg:"#f8f5ff" },
+      ivory:  { bg:"#fffdf5", border:"#e6ddc8", header:"#f6f0df", timebg:"#fffaf0" }
+    };
+
+    function applyTheme(key){
+      const t = THEMES[key] || THEMES.lblue;
+      document.documentElement.style.setProperty("--bg", t.bg);
+      document.documentElement.style.setProperty("--border", t.border);
+      document.documentElement.style.setProperty("--header", t.header);
+      document.documentElement.style.setProperty("--timebg", t.timebg);
+      localStorage.setItem(K.theme, key);
+    }
+
+    /***********************
+     * Central App Dialog (replaces alert/confirm)
+     ************************/
+    const appDialogBackdrop = document.getElementById("appDialogBackdrop");
+    const appDialogTitle = document.getElementById("appDialogTitle");
+    const appDialogMessage = document.getElementById("appDialogMessage");
+    const appDialogSub = document.getElementById("appDialogSub");
+    const appDialogActions = document.getElementById("appDialogActions");
+    const appDialogX = document.getElementById("appDialogX");
+
+    let appDialogResolver = null;
+
+    function closeAppDialog(result=null){
+      appDialogBackdrop.style.display = "none";
+      const resolver = appDialogResolver;
+      appDialogResolver = null;
+      if(resolver) resolver(result);
+    }
+    appDialogX.addEventListener("click", ()=>closeAppDialog(null));
+    appDialogBackdrop.addEventListener("click", (e)=>{ if(e.target===appDialogBackdrop) closeAppDialog(null); });
+
+    function showAppDialog({title="알림", message="", sub="", buttons=[]}){
+      return new Promise((resolve)=>{
+        appDialogResolver = resolve;
+
+        appDialogTitle.innerHTML = `<span class="pill">${escapeHtml(title)}</span>`;
+        appDialogMessage.innerHTML = message; // allow <b> etc (trusted strings)
+        if(sub && sub.trim()){
+          appDialogSub.style.display = "block";
+          appDialogSub.textContent = sub;
+        } else {
+          appDialogSub.style.display = "none";
+        }
+
+        appDialogActions.innerHTML = "";
+        if(!buttons.length){
+          buttons = [{label:"확인", value:true, className:"btn"}];
+        }
+        buttons.forEach(btn=>{
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = btn.className || "btn";
+          b.textContent = btn.label;
+          b.addEventListener("click", ()=>closeAppDialog(btn.value));
+          appDialogActions.appendChild(b);
+        });
+
+        appDialogBackdrop.style.display = "flex";
+      });
+    }
+
+    async function appAlert(message, title="알림", sub=""){
+      await showAppDialog({
+        title, message: escapeHtmlLines(message), sub,
+        buttons: [{label:"확인", value:true, className:"btn"}]
+      });
+      return true;
+    }
+    async function appConfirm(message, title="확인", sub=""){
+      const res = await showAppDialog({
+        title, message: escapeHtmlLines(message), sub,
+        buttons: [
+          {label:"취소", value:false, className:"btn ghost"},
+          {label:"확인", value:true, className:"btn"}
+        ]
+      });
+      return !!res;
+    }
+    async function appChoice(message, title="확인", sub="", leftLabel="취소", rightLabel="확인"){
+      const res = await showAppDialog({
+        title, message: escapeHtmlLines(message), sub,
+        buttons: [
+          {label:leftLabel, value:false, className:"btn ghost"},
+          {label:rightLabel, value:true, className:"btn"}
+        ]
+      });
+      return !!res;
+    }
+
+    /***********************
+     * Print dialog exception with hide 3 times
+     ************************/
+    const printDialogBackdrop = document.getElementById("printDialogBackdrop");
+    const printDialogX = document.getElementById("printDialogX");
+    const printHide3Btn = document.getElementById("printHide3Btn");
+    const printProceedBtn = document.getElementById("printProceedBtn");
+
+    let printDialogResolver = null;
+
+    function closePrintDialog(res=null){
+      printDialogBackdrop.style.display = "none";
+      const r = printDialogResolver;
+      printDialogResolver = null;
+      if(r) r(res);
+    }
+    printDialogX.addEventListener("click", ()=>closePrintDialog(false));
+    printDialogBackdrop.addEventListener("click", (e)=>{ if(e.target===printDialogBackdrop) closePrintDialog(false); });
+    printProceedBtn.addEventListener("click", ()=>closePrintDialog(true));
+    printHide3Btn.addEventListener("click", ()=>{
+      localStorage.setItem(K.print_hide_rem, "3");
+      closePrintDialog(true);
+    });
+
+    function ensureDeviceId(){
+      let id = localStorage.getItem(K.device_id);
+      if(!id){
+        id = cryptoRandomId();
+        localStorage.setItem(K.device_id, id);
+      }
+      return id;
+    }
+
+    async function maybeShowPrintDialog(){
+      ensureDeviceId();
+      const rem = Number(localStorage.getItem(K.print_hide_rem) || "0");
+      if(rem > 0){
+        const next = rem - 1;
+        if(next <= 0) localStorage.removeItem(K.print_hide_rem);
+        else localStorage.setItem(K.print_hide_rem, String(next));
+        return true; // skip dialog, proceed
+      }
+      return new Promise((resolve)=>{
+        printDialogResolver = resolve;
+        printDialogBackdrop.style.display = "flex";
+      });
+    }
+
+    /***********************
+     * Utils
+     ************************/
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+    function escapeHtmlLines(s){
+      return escapeHtml(s).replaceAll("\n","<br>");
+    }
+    function cryptoRandomId(){
+      // simple UUID-ish
+      const a = crypto.getRandomValues(new Uint8Array(16));
+      const hex = [...a].map(b=>b.toString(16).padStart(2,"0")).join("");
+      return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+    }
+    const pad2 = n => String(n).padStart(2,"0");
+    function fmtYMDHMS(date, timeFmt=true){
+      const d = new Date(date);
+      const yyyy = d.getFullYear();
+      const mm = pad2(d.getMonth()+1);
+      const dd = pad2(d.getDate());
+      let hh = d.getHours();
+      const mi = pad2(d.getMinutes());
+      const ss = pad2(d.getSeconds());
+      // apply beta time format across app
+      if(timeFmt && isTimeFormatActive()){
+        const {text} = formatTimeForApp(`${pad2(hh)}:${mi}`);
+        // text could be "오전 1:05" etc (no seconds) -> append seconds without breaking
+        // We'll show seconds always in 24H to keep list stable IF 12h would look messy
+        // But user asked app-wide. We'll append :ss to 24h string only. For 12h, keep seconds in small suffix.
+        if(getTimeFmtMode() === "24"){
+          return `${yyyy}.${mm}.${dd} ${text}:${ss}`;
+        } else {
+          return `${yyyy}.${mm}.${dd} ${text}:${ss}`; // acceptable
+        }
+      }
+      return `${yyyy}.${mm}.${dd} ${pad2(hh)}:${mi}:${ss}`;
+    }
+
+    /***********************
+     * Beta / App language / Time format
+     ************************/
+    function isBetaOn(){
+      return (localStorage.getItem(K.betaOn) || "0") === "1";
+    }
+    function setBetaOn(on){
+      localStorage.setItem(K.betaOn, on ? "1" : "0");
+      document.documentElement.dataset.beta = on ? "on" : "off";
+    }
+
+    function isTimeFormatActive(){
+      return (localStorage.getItem(K.tf_enabled) || "0") === "1";
+    }
+    function getTimeFmtMode(){
+      return localStorage.getItem(K.tf_mode) || "24"; // "24" or "12"
+    }
+    function getTimeFmtLang(){
+      return localStorage.getItem(K.tf_lang) || "ko"; // "ko" or "en"
+    }
+    function setTimeFmt(enabled, mode, lang){
+      localStorage.setItem(K.tf_enabled, enabled ? "1":"0");
+      if(mode) localStorage.setItem(K.tf_mode, mode);
+      if(lang) localStorage.setItem(K.tf_lang, lang);
+    }
+
+    function getAppLang(){
+      return localStorage.getItem(K.app_lang) || "ko";
+    }
+    function setAppLang(lang){
+      localStorage.setItem(K.app_lang, lang);
+    }
+
+    function isModeSplitOn(){
+      return (localStorage.getItem(K.mode_enabled) || "0") === "1";
+    }
+    function getModeValue(){
+      return localStorage.getItem(K.mode_value) || "pc";
+    }
+    function applyModeClass(){
+      if(isModeSplitOn()){
+        const v = getModeValue();
+        document.documentElement.dataset.mode = v;
+      } else {
+        document.documentElement.dataset.mode = "auto";
+      }
+    }
+
+    function formatTimeForApp(hhmm){
+      // hhmm in "HH:MM"
+      const [H, M] = hhmm.split(":").map(Number);
+      if(!isTimeFormatActive() || getTimeFmtMode()==="24"){
+        return { text: `${pad2(H)}:${pad2(M)}` };
+      }
+      // 12h
+      const lang = getTimeFmtLang();
+      const isPM = H >= 12;
+      let h12 = H % 12;
+      if(h12 === 0) h12 = 12;
+      const suffix = (lang === "ko") ? (isPM ? "오후" : "오전") : (isPM ? "PM" : "AM");
+      // style: "오전 6:00" / "AM 6:00"
+      return { text: `${suffix} ${h12}:${pad2(M)}` };
+    }
+
+    /***********************
+     * Planner Data
+     ************************/
+    const baseTimes = ["06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00","00:00","01:00"];
+    const days = ["월","화","수","목","금","토","일"];
+
+    function cellId(r,c){ return `${r}-${c}`; }
+
+    function getData(){
+      try { return JSON.parse(localStorage.getItem(K.data) || "{}"); }
+      catch { return {}; }
+    }
+    function setData(obj){
+      localStorage.setItem(K.data, JSON.stringify(obj));
+    }
+
+    function getTitle(){
+      const t = (localStorage.getItem(K.title) || "").trim();
+      return t ? t : "주간 플래너";
+    }
+    function setTitle(text, isAuto=false){
+      const v = (text || "").trim();
+      localStorage.setItem(K.title, v);
+      localStorage.setItem(K.titleAuto, isAuto ? "1" : "0");
+      applyTitleToUI();
+    }
+    function clearTitle(){
+      localStorage.removeItem(K.title);
+      localStorage.setItem(K.titleAuto, "0");
+      applyTitleToUI();
+    }
+    function applyTitleToUI(){
+      document.getElementById("plannerTitleText").textContent = getTitle();
+    }
+
+    /***********************
+     * DOM
+     ************************/
+    const rowsEl = document.getElementById("rows");
+    const plannerTable = document.getElementById("plannerTable");
+    const tableWrap = document.getElementById("tableWrap");
+
+    const themeSelect = document.getElementById("themeSelect");
+
+    const dateLinkToggle = document.getElementById("dateLinkToggle");
+    const dateSwitch = document.getElementById("dateSwitch");
+    const pickWeekBtn = document.getElementById("pickWeekBtn");
+
+    const backupToggle = document.getElementById("backupToggle");
+    const backupSwitch = document.getElementById("backupSwitch");
+    const manualSaveBtn = document.getElementById("manualSaveBtn");
+    const backupListBtn = document.getElementById("backupListBtn");
+
+    const betaToggle = document.getElementById("betaToggle");
+    const betaSwitch = document.getElementById("betaSwitch");
+    const betaInfoBtn = document.getElementById("betaInfoBtn");
+    const betaFeaturesBtn = document.getElementById("betaFeaturesBtn");
+
+    const orientationSelect = document.getElementById("orientationSelect");
+    const printBtn = document.getElementById("printBtn");
+
+    const downloadBtn = document.getElementById("downloadBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const importBtn = document.getElementById("importBtn");
+    const importFile = document.getElementById("importFile");
+
+    const resetSizeBtn = document.getElementById("resetSizeBtn");
+    const resetAllBtn = document.getElementById("resetAllBtn");
+
+    const noticeBtn = document.getElementById("noticeBtn");
+    const noticeBackdrop = document.getElementById("noticeBackdrop");
+    const closeNotice = document.getElementById("closeNotice");
+    const okNotice = document.getElementById("okNotice");
+
+    // tooltip
+    const tooltip = document.getElementById("tooltip");
+    const tooltipMeta = document.getElementById("tooltipMeta");
+    const tooltipBody = document.getElementById("tooltipBody");
+
+    // joystick
+    const joyRunBtn = document.getElementById("joyRunBtn");
+    const joyOverlay = document.getElementById("joyOverlay");
+    const joyCloseBtn = document.getElementById("joyCloseBtn");
+    const joyDeselectBtn = document.getElementById("joyDeselectBtn");
+
+    // cell modal
+    const cellBackdrop = document.getElementById("cellBackdrop");
+    const cellLabel = document.getElementById("cellLabel");
+    const cellInput = document.getElementById("cellInput");
+    const closeCell = document.getElementById("closeCell");
+    const saveCellBtn = document.getElementById("saveCellBtn");
+    const clearCellBtn = document.getElementById("clearCellBtn");
+
+    // title modal
+    const titleBox = document.getElementById("titleBox");
+    const titleBackdrop = document.getElementById("titleBackdrop");
+    const titleInput = document.getElementById("titleInput");
+    const closeTitle = document.getElementById("closeTitle");
+    const saveTitleBtn = document.getElementById("saveTitleBtn");
+    const clearTitleBtn = document.getElementById("clearTitleBtn");
+
+    // calendar modal
+    const calBackdrop = document.getElementById("calBackdrop");
+    const calLabel = document.getElementById("calLabel");
+    const calPrev = document.getElementById("calPrev");
+    const calNext = document.getElementById("calNext");
+    const calToday = document.getElementById("calToday");
+    const calThisWeek = document.getElementById("calThisWeek");
+    const calWeeks = document.getElementById("calWeeks");
+    const closeCal = document.getElementById("closeCal");
+    const cancelCal = document.getElementById("cancelCal");
+    const applyCal = document.getElementById("applyCal");
+    const mwBadge = document.getElementById("mwBadge");
+
+    // backup modal
+    const backupBackdrop = document.getElementById("backupBackdrop");
+    const backupListEl = document.getElementById("backupList");
+    const closeBackup = document.getElementById("closeBackup");
+    const backupCloseBtn = document.getElementById("backupCloseBtn");
+    const backupPurgeBtn = document.getElementById("backupPurgeBtn");
+
+    // beta modal
+    const betaBackdrop = document.getElementById("betaBackdrop");
+    const featureListEl = document.getElementById("featureList");
+    const closeBeta = document.getElementById("closeBeta");
+    const betaCloseBtn = document.getElementById("betaCloseBtn");
+
+    // beta config modal
+    const betaConfigBackdrop = document.getElementById("betaConfigBackdrop");
+    const betaConfigTitle = document.getElementById("betaConfigTitle");
+    const betaConfigBody = document.getElementById("betaConfigBody");
+    const betaConfigActions = document.getElementById("betaConfigActions");
+    const closeBetaConfig = document.getElementById("closeBetaConfig");
+
+    // download modals
+    const dlBackdrop = document.getElementById("dlBackdrop");
+    const closeDL = document.getElementById("closeDL");
+    const dlTitle = document.getElementById("dlTitle");
+    const dlExt = document.getElementById("dlExt");
+    const dlProgramToggle = document.getElementById("dlProgramToggle");
+    const dlProgramSwitch = document.getElementById("dlProgramSwitch");
+    const dlCancelBtn = document.getElementById("dlCancelBtn");
+    const dlNextBtn = document.getElementById("dlNextBtn");
+
+    const progBackdrop = document.getElementById("progBackdrop");
+    const closeProg = document.getElementById("closeProg");
+    const progCancelBtn = document.getElementById("progCancelBtn");
+    const progDownloadBtn = document.getElementById("progDownloadBtn");
+
+    const dotHtml = document.getElementById("dotHtml");
+    const dotIco = document.getElementById("dotIco");
+    const dotPng = document.getElementById("dotPng");
+
+    const multiOptionWrap = document.getElementById("multiOptionWrap");
+    const optZip = document.getElementById("optZip");
+    const optSeparate = document.getElementById("optSeparate");
+    const dotZip = document.getElementById("dotZip");
+    const dotSeparate = document.getElementById("dotSeparate");
+
+    /***********************
+     * Switch visuals
+     ************************/
+    function setSwitchVisual(wrapper, checked){
+      wrapper.classList.toggle("on", checked);
+    }
+
+    /***********************
+     * Orientation
+     ************************/
+    function applyOrientation(value){
+      document.documentElement.style.setProperty("--paper", value);
+      document.documentElement.dataset.paper = value;
+      localStorage.setItem(K.ori, value);
+    }
+
+    /***********************
+     * Date / Calendar
+     ************************/
+    let calYear = (new Date()).getFullYear();
+    let calMonth = (new Date()).getMonth()+1;
+    let selectedMonday = null;
+    let previewMonday = null;
+    let headerBackupBeforePreview = null;
+
+    function fmtKoreanDate(d){
+      return `${d.getMonth()+1}월 ${d.getDate()}일`;
+    }
+
+    // Monday-based
+    function getMondayFromDate(d){
+      const date = new Date(d);
+      const dow = (date.getDay()+6)%7; // Mon=0
+      date.setDate(date.getDate()-dow);
+      date.setHours(0,0,0,0);
+      return date;
+    }
+    // "1일 포함 주 = 그달 1주"
+    function getMonthWeek1Monday(year, month1to12){
+      const first = new Date(year, month1to12-1, 1);
+      return getMondayFromDate(first);
+    }
+    function getMonthWeekCount(year, month1to12){
+      const week1Mon = getMonthWeek1Monday(year, month1to12);
+      const last = new Date(year, month1to12, 0);
+      const lastMon = getMondayFromDate(last);
+      const diffDays = Math.round((lastMon-week1Mon)/(1000*60*60*24));
+      return Math.floor(diffDays/7)+1;
+    }
+    function monthWeekNoFromMonday(year, month1to12, monday){
+      const week1Mon = getMonthWeek1Monday(year, month1to12);
+      const diffDays = Math.round((monday-week1Mon)/(1000*60*60*24));
+      return Math.floor(diffDays/7)+1;
+    }
+
+    function clearHeaderDates(){
+      document.querySelectorAll(".date[data-dow]").forEach(el=> el.textContent="");
+      document.getElementById("plannerMetaText").textContent = "";
+      plannerTable.classList.add("no-date");
+    }
+    function applyWeekMonday(monday){
+      plannerTable.classList.remove("no-date");
+      const start = new Date(monday);
+      const end = new Date(monday); end.setDate(monday.getDate()+6);
+
+      document.querySelectorAll(".date[data-dow]").forEach(el=>{
+        const i = Number(el.dataset.dow);
+        const d = new Date(monday);
+        d.setDate(monday.getDate()+i);
+        el.textContent = `(${fmtKoreanDate(d)})`;
+      });
+      document.getElementById("plannerMetaText").textContent = `기간: ${fmtKoreanDate(start)} ~ ${fmtKoreanDate(end)}`;
+    }
+
+    function applyPreviewBadge(year, month1to12, monday){
+      const start = new Date(monday);
+      const end = new Date(monday); end.setDate(monday.getDate()+6);
+      const wNo = monthWeekNoFromMonday(year, month1to12, monday);
+      mwBadge.textContent = `미리보기: ${year}년 ${month1to12}월 ${wNo}주 · ${fmtKoreanDate(start)} ~ ${fmtKoreanDate(end)} ✅`;
+    }
+
+    function autoSelectThisWeek(){
+      const now = new Date();
+      const monday = getMondayFromDate(now);
+      selectedMonday = monday;
+      previewMonday = monday;
+      calYear = now.getFullYear();
+      calMonth = now.getMonth()+1;
+
+      applyWeekMonday(monday);
+      applyPreviewBadge(calYear, calMonth, monday);
+    }
+
+    function openCal(){
+      // backup header for cancel
+      headerBackupBeforePreview = {
+        meta: document.getElementById("plannerMetaText").textContent,
+        dates: Array.from(document.querySelectorAll(".date[data-dow]")).map(el => el.textContent),
+        noDate: plannerTable.classList.contains("no-date")
+      };
+
+      autoSelectThisWeek();
+      calBackdrop.style.display="flex";
+      renderCalendar(calYear, calMonth);
+    }
+
+    function closeCalModal(restorePreview=true){
+      calBackdrop.style.display="none";
+      if(restorePreview && headerBackupBeforePreview){
+        if(headerBackupBeforePreview.noDate){
+          clearHeaderDates();
+          plannerTable.classList.add("no-date");
+        }else{
+          plannerTable.classList.remove("no-date");
+          const dates = headerBackupBeforePreview.dates || [];
+          document.querySelectorAll(".date[data-dow]").forEach((el, idx)=>{
+            el.textContent = dates[idx] || "";
+          });
+          document.getElementById("plannerMetaText").textContent = headerBackupBeforePreview.meta || "";
+        }
+      }
+      previewMonday = null;
+      headerBackupBeforePreview = null;
+    }
+
+    function renderCalendar(year, month1to12){
+      calLabel.textContent = `${year}년 ${month1to12}월`;
+      const weekCount = getMonthWeekCount(year, month1to12);
+      const startMon = getMonthWeek1Monday(year, month1to12);
+      calWeeks.innerHTML = "";
+
+      for(let w=1; w<=weekCount; w++){
+        const monday = new Date(startMon);
+        monday.setDate(startMon.getDate() + (w-1)*7);
+
+        const weekEl = document.createElement("div");
+        weekEl.className = "cal-week";
+        weekEl.dataset.monday = monday.toISOString();
+
+        for(let i=0;i<7;i++){
+          const d = new Date(monday);
+          d.setDate(monday.getDate()+i);
+          const inMonth = (d.getMonth()+1) === month1to12;
+
+          const cell = document.createElement("div");
+          cell.className = "cal-cell" + (inMonth ? "" : " out") + (i===5 ? " sat" : "") + (i===6 ? " sun" : "");
+          cell.innerHTML = `<div class="d">${d.getDate()}</div><div class="m">${d.getMonth()+1}월</div>`;
+          weekEl.appendChild(cell);
+        }
+
+        const chosen = previewMonday ? previewMonday : (selectedMonday ? getMondayFromDate(selectedMonday) : null);
+        if(chosen && chosen.getTime() === monday.getTime()){
+          weekEl.classList.add("selected");
+        }
+
+        weekEl.addEventListener("click", ()=>{
+          selectedMonday = new Date(weekEl.dataset.monday);
+          previewMonday = getMondayFromDate(selectedMonday);
+
+          applyWeekMonday(previewMonday);
+          applyPreviewBadge(year, month1to12, previewMonday);
+          renderCalendar(year, month1to12);
+        });
+
+        calWeeks.appendChild(weekEl);
+      }
+    }
+
+    function enableDateLink(enable, forcePick=false){
+      dateLinkToggle.checked = enable;
+      setSwitchVisual(dateSwitch, enable);
+      localStorage.setItem(K.dateOn, enable ? "1":"0");
+      pickWeekBtn.style.display = enable ? "inline-flex" : "none";
+
+      if(!enable){
+        clearHeaderDates();
+        const wasAuto = localStorage.getItem(K.titleAuto) === "1";
+        const storedTitle = (localStorage.getItem(K.title) || "").trim();
+        if(wasAuto && storedTitle.length > 0) clearTitle();
+        else applyTitleToUI();
+        return;
+      }
+
+      if(forcePick){
+        selectedMonday = null;
+        previewMonday = null;
+        openCal();
+        return;
+      }
+
+      const saved = localStorage.getItem(K.mw);
+      if(saved){
+        const [sy, sm, sw] = saved.split("-");
+        calYear = Number(sy);
+        calMonth = Number(sm);
+        const w = Number(sw.replace("W",""));
+        const week1 = getMonthWeek1Monday(calYear, calMonth);
+        const monday = new Date(week1);
+        monday.setDate(week1.getDate() + (w-1)*7);
+        selectedMonday = monday;
+        applyWeekMonday(monday);
+      }else{
+        openCal();
+      }
+    }
+
+    /***********************
+     * Cells + Selection + Keyboard nav
+     ************************/
+    let editingCell = { r:null, c:null };
+    let selectedRC = { r: 0, c: 0 };
+    let hasSelection = true; // at least one selected by default; can be cleared
+
+    function normalizeDisplay(full){
+      const text = (full || "").replace(/\r/g,"");
+      const firstLine = text.split("\n")[0] || "";
+      const more = text.includes("\n") || firstLine.length > 18;
+      return { firstLine: firstLine.trim(), hasMore: more };
+    }
+
+    function updateCellDisplay(td, fullValue){
+      const full = (fullValue || "");
+      td.dataset.full = full;
+
+      if(!full.trim()){
+        td.textContent = "";
+        td.classList.add("empty");
+        td.classList.remove("hasMore","expanded");
+        td.innerHTML = `<span class="expander" data-action="toggle"></span>`;
+        return;
+      }
+
+      const { firstLine, hasMore } = normalizeDisplay(full);
+
+      td.classList.remove("empty");
+      td.classList.toggle("hasMore", hasMore);
+
+      const show = td.classList.contains("expanded") ? full : firstLine;
+      td.textContent = show;
+
+      const ex = document.createElement("span");
+      ex.className = "expander";
+      ex.dataset.action = "toggle";
+      td.appendChild(ex);
+    }
+
+    function renderGrid(){
+      rowsEl.innerHTML = baseTimes.map((t, r)=>{
+        const {text} = formatTimeForApp(t);
+        return `
+          <tr>
+            <td class="time" data-r="${r}">${escapeHtml(text)}</td>
+            ${Array.from({length:7}).map((_, c)=>
+              `<td class="cell empty" data-r="${r}" data-c="${c}">
+                 <span class="expander" data-action="toggle"></span>
+               </td>`
+            ).join("")}
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function refreshTimeColumn(){
+      document.querySelectorAll("td.time[data-r]").forEach(td=>{
+        const r = Number(td.dataset.r);
+        const {text} = formatTimeForApp(baseTimes[r]);
+        td.textContent = text;
+      });
+    }
+
+    function loadAllCells(){
+      const data = getData();
+      document.querySelectorAll("td.cell").forEach(td=>{
+        const r = td.dataset.r, c = td.dataset.c;
+        updateCellDisplay(td, data[cellId(r,c)] || "");
+      });
+    }
+
+    function openCellModal(r, c){
+      editingCell = { r, c };
+      const data = getData();
+      const val = data[cellId(r,c)] || "";
+      cellInput.value = val;
+
+      const timeText = formatTimeForApp(baseTimes[r]).text;
+      cellLabel.textContent = `${timeText} · ${days[c]}`;
+
+      cellBackdrop.style.display="flex";
+      setTimeout(()=>cellInput.focus(), 50);
+    }
+    function closeCellModal(){
+      cellBackdrop.style.display="none";
+      editingCell = { r:null, c:null };
+    }
+
+    function clearSelectedCell(){
+      document.querySelectorAll("td.cell.selected").forEach(td=>td.classList.remove("selected"));
+    }
+    function selectCell(r, c, scrollInto=true){
+      r = Math.max(0, Math.min(baseTimes.length-1, r));
+      c = Math.max(0, Math.min(6, c));
+      selectedRC = { r, c };
+      hasSelection = true;
+
+      clearSelectedCell();
+      const td = document.querySelector(`td.cell[data-r="${r}"][data-c="${c}"]`);
+      if(td){
+        td.classList.add("selected");
+        if(scrollInto) td.scrollIntoView({block:"nearest", inline:"nearest"});
+      }
+    }
+    function deselectCell(){
+      hasSelection = false;
+      clearSelectedCell();
+    }
+    function ensureSelection(){
+      if(!hasSelection){
+        selectCell(selectedRC.r ?? 0, selectedRC.c ?? 0, false);
+      }
+    }
+
+    function saveCellValue(r, c, value){
+      const data = getData();
+      const v = (value || "").replace(/\s+$/,"");
+      const id = cellId(r,c);
+
+      if(v.trim()==="") delete data[id];
+      else data[id] = v;
+
+      setData(data);
+
+      const td = document.querySelector(`td.cell[data-r="${r}"][data-c="${c}"]`);
+      if(td) updateCellDisplay(td, data[id] || "");
+    }
+
+    /***********************
+     * Tooltip (PC hover only) + no mobile long-press (removed)
+     ************************/
+    function hideTooltip(){ tooltip.style.display="none"; }
+    function showTooltipForCell(td, x, y){
+      const full = td?.dataset?.full || "";
+      if(!full || !full.trim()) return;
+
+      const r = Number(td.dataset.r), c = Number(td.dataset.c);
+      const timeText = formatTimeForApp(baseTimes[r]).text;
+
+      tooltipMeta.textContent = `${timeText} · ${days[c]}`;
+      tooltipBody.textContent = full;
+
+      tooltip.style.display = "block";
+
+      const rect = tooltip.getBoundingClientRect();
+      const pad = 10;
+      let left = x + 12;
+      let top  = y + 12;
+
+      if(left + rect.width > window.innerWidth - pad) left = window.innerWidth - pad - rect.width;
+      if(top + rect.height > window.innerHeight - pad) top = window.innerHeight - pad - rect.height;
+      if(left < pad) left = pad;
+      if(top < pad) top = pad;
+
+      tooltip.style.left = left + "px";
+      tooltip.style.top  = top + "px";
+    }
+
+    /***********************
+     * Backup system (auto + manual, TTL 5 min)
+     ************************/
+    let backupIntervalId = null;
+
+    function readBackups(){
+      try{ return JSON.parse(localStorage.getItem(K.backups) || "[]"); }
+      catch{ return []; }
+    }
+    function writeBackups(list){
+      localStorage.setItem(K.backups, JSON.stringify(list));
+    }
+    function cleanupBackups(){
+      const now = Date.now();
+      const ttl = 5 * 60 * 1000;
+      const list = readBackups().filter(b => b && typeof b.ts === "number" && (now - b.ts) <= ttl);
+      writeBackups(list);
+    }
+
+    function snapshotPayload(type){
+      return {
+        ts: Date.now(),
+        type, // "auto" | "manual"
+        settings: collectSettings(),
+        data: getData()
+      };
+    }
+
+    function collectSettings(){
+      return {
+        title: localStorage.getItem(K.title) || "",
+        titleAuto: localStorage.getItem(K.titleAuto) || "0",
+        dateOn: localStorage.getItem(K.dateOn) || "0",
+        monthWeek: localStorage.getItem(K.mw) || "",
+        orientation: localStorage.getItem(K.ori) || "portrait",
+        theme: localStorage.getItem(K.theme) || "lblue",
+        betaOn: localStorage.getItem(K.betaOn) || "0",
+        tf_enabled: localStorage.getItem(K.tf_enabled) || "0",
+        tf_mode: localStorage.getItem(K.tf_mode) || "24",
+        tf_lang: localStorage.getItem(K.tf_lang) || "ko",
+        app_lang: localStorage.getItem(K.app_lang) || "ko",
+        mode_enabled: localStorage.getItem(K.mode_enabled) || "0",
+        mode_value: localStorage.getItem(K.mode_value) || "pc",
+        shortcuts_enabled: localStorage.getItem(K.shortcuts_enabled) || "0"
+      };
+    }
+
+    function applySettings(settings){
+      if(!settings) return;
+      localStorage.setItem(K.title, settings.title || "");
+      localStorage.setItem(K.titleAuto, settings.titleAuto || "0");
+      localStorage.setItem(K.dateOn, settings.dateOn || "0");
+      localStorage.setItem(K.mw, settings.monthWeek || "");
+      localStorage.setItem(K.ori, settings.orientation || "portrait");
+      localStorage.setItem(K.theme, settings.theme || "lblue");
+
+      localStorage.setItem(K.betaOn, settings.betaOn || "0");
+      localStorage.setItem(K.tf_enabled, settings.tf_enabled || "0");
+      localStorage.setItem(K.tf_mode, settings.tf_mode || "24");
+      localStorage.setItem(K.tf_lang, settings.tf_lang || "ko");
+      localStorage.setItem(K.app_lang, settings.app_lang || "ko");
+      localStorage.setItem(K.mode_enabled, settings.mode_enabled || "0");
+      localStorage.setItem(K.mode_value, settings.mode_value || "pc");
+      localStorage.setItem(K.shortcuts_enabled, settings.shortcuts_enabled || "0");
+    }
+
+    function doBackupTick(){
+      cleanupBackups();
+      const list = readBackups();
+      list.push(snapshotPayload("auto"));
+      writeBackups(list);
+      cleanupBackups();
+    }
+
+    function startBackup(){
+      stopBackup();
+      doBackupTick();
+      backupIntervalId = setInterval(doBackupTick, 60 * 1000);
+    }
+    function stopBackup(){
+      if(backupIntervalId){
+        clearInterval(backupIntervalId);
+        backupIntervalId = null;
+      }
+    }
+    function setBackupEnabled(on){
+      backupToggle.checked = on;
+      setSwitchVisual(backupSwitch, on);
+      localStorage.setItem(K.backupOn, on ? "1":"0");
+      if(on) startBackup(); else stopBackup();
+      cleanupBackups();
+    }
+    function isBackupOn(){
+      return (localStorage.getItem(K.backupOn) || "0") === "1";
+    }
+
+    function addManualBackup(){
+      cleanupBackups();
+      const list = readBackups();
+      list.push(snapshotPayload("manual"));
+      writeBackups(list);
+      cleanupBackups();
+    }
+
+    function renderBackupList(){
+      cleanupBackups();
+      const list = readBackups().slice().sort((a,b)=>b.ts-a.ts);
+      backupListEl.innerHTML = "";
+
+      if(!list.length){
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "저장된 백업이 없습니다.";
+        backupListEl.appendChild(empty);
+        return;
+      }
+
+      list.forEach((b, idx)=>{
+        const item = document.createElement("div");
+        item.className = "backupItem";
+
+        const dot = document.createElement("span");
+        dot.className = "dot fill " + (b.type==="manual" ? "green" : "blue");
+        dot.style.border = "0";
+        item.appendChild(dot);
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+
+        const line1 = document.createElement("div");
+        line1.className = "line1";
+        const tag = (b.type==="manual") ? "(수동)" : "(자동)";
+        line1.textContent = `${tag} ${fmtYMDHMS(b.ts, true)}`;
+        meta.appendChild(line1);
+
+        const line2 = document.createElement("div");
+        line2.className = "line2";
+        line2.textContent = "복원하면 현재 내용이 덮어쓰기 됩니다.";
+        meta.appendChild(line2);
+
+        item.appendChild(meta);
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const restore = document.createElement("button");
+        restore.type="button";
+        restore.className="miniBtn restore";
+        restore.textContent="복원";
+        restore.addEventListener("click", async ()=>{
+          const ok = await appConfirm("정말 이 백업으로 복원하시겠습니까?\n현재 내용은 덮어쓰기 됩니다.", "백업 복원");
+          if(!ok) return;
+
+          // apply data
+          try{
+            applySettings(b.settings);
+            setData(b.data || {});
+            // refresh UI after restore
+            initFromStorage(true);
+            await appAlert("복원이 완료되었습니다.", "완료");
+            closeBackupModal();
+          }catch{
+            await appAlert("복원 중 오류가 발생했습니다.", "오류");
+          }
+        });
+
+        const del = document.createElement("button");
+        del.type="button";
+        del.className="miniBtn del";
+        del.textContent="삭제";
+        del.addEventListener("click", async ()=>{
+          const ok = await appConfirm("이 백업을 삭제하시겠습니까?", "백업 삭제");
+          if(!ok) return;
+          const cur = readBackups();
+          const ts = b.ts;
+          const next = cur.filter(x=>x && x.ts !== ts);
+          writeBackups(next);
+          renderBackupList();
+        });
+
+        actions.appendChild(restore);
+        actions.appendChild(del);
+        item.appendChild(actions);
+
+        backupListEl.appendChild(item);
+      });
+    }
+
+    function openBackupModal(){
+      renderBackupList();
+      backupBackdrop.style.display="flex";
+    }
+    function closeBackupModal(){
+      backupBackdrop.style.display="none";
+    }
+
+    /***********************
+     * Beta Features
+     ************************/
+    const FEATURES = [
+      { id:"timefmt", name:"앱 24H/12H 형식전환" },
+      { id:"applang", name:"앱 언어 설정" },
+      { id:"shortcuts", name:"나만의 단축키" },
+      { id:"modesplit", name:"PC/모바일 모드 나누기" }
+    ];
+
+    function featureIsRunning(id){
+      if(id==="timefmt") return isTimeFormatActive();
+      if(id==="applang") return true; // language always "applies" but treat as running when beta on? better: store enabled
+      if(id==="shortcuts") return (localStorage.getItem(K.shortcuts_enabled) || "0") === "1";
+      if(id==="modesplit") return isModeSplitOn();
+      return false;
+    }
+
+    function setFeatureRunning(id, on){
+      if(id==="timefmt"){
+        setTimeFmt(on, getTimeFmtMode(), getTimeFmtLang());
+        applyTimeFormatEverywhere();
+        return;
+      }
+      if(id==="applang"){
+        // treat as always available; "stop" resets to ko
+        if(on){
+          // keep current app_lang
+        } else {
+          setAppLang("ko");
+        }
+        applyLanguageUI();
+        return;
+      }
+      if(id==="shortcuts"){
+        localStorage.setItem(K.shortcuts_enabled, on ? "1":"0");
+        return;
+      }
+      if(id==="modesplit"){
+        localStorage.setItem(K.mode_enabled, on ? "1":"0");
+        applyModeClass();
+        return;
+      }
+    }
+
+    function openBetaFeatures(){
+      if(!isBetaOn()){
+        appAlert("Beta버전을 켠 뒤에 사용할 수 있습니다.", "Beta");
+        return;
+      }
+      renderFeatureList();
+      betaBackdrop.style.display="flex";
+    }
+    function closeBetaModal(){ betaBackdrop.style.display="none"; }
+
+    function renderFeatureList(){
+      featureListEl.innerHTML = "";
+      FEATURES.forEach(f=>{
+        const row = document.createElement("div");
+        row.className = "featureRow";
+
+        const name = document.createElement("div");
+        name.className = "name";
+        name.textContent = f.name;
+        row.appendChild(name);
+
+        const right = document.createElement("div");
+        right.className = "rightCtl";
+
+        const running = featureIsRunning(f.id);
+
+        const icon = document.createElement("div");
+        icon.className = "statusIcon" + (running ? " stop" : "");
+        right.appendChild(icon);
+
+        const label = document.createElement("div");
+        label.className = "runStopLabel" + (running ? " stop" : "");
+        label.textContent = running ? "정지" : "실행";
+        right.appendChild(label);
+
+        right.style.cursor = "pointer";
+        right.addEventListener("click", async ()=>{
+          if(running){
+            const ok = await appConfirm(`정말 ${f.name} 기능을 정지하시겠습니까?`, "기능 정지");
+            if(!ok) return;
+            // revert for each
+            if(f.id==="timefmt"){
+              setTimeFmt(false, "24", "ko");
+              applyTimeFormatEverywhere();
+            }else if(f.id==="applang"){
+              setAppLang("ko");
+              applyLanguageUI();
+            }else if(f.id==="shortcuts"){
+              setFeatureRunning("shortcuts", false);
+            }else if(f.id==="modesplit"){
+              localStorage.setItem(K.mode_value, "pc");
+              setFeatureRunning("modesplit", false);
+            }
+            renderFeatureList();
+            await appAlert("기능이 정지되었습니다.", "완료");
+            return;
+          }
+
+          // start
+          const ok = await appConfirm(`${f.name} 기능을 사용하시겠습니까?`, "기능 실행");
+          if(!ok) return;
+
+          if(f.id==="shortcuts"){
+            await appAlert("지금은 준비중입니다.", "준비중");
+            return;
+          }
+
+          if(f.id==="timefmt"){
+            openBetaConfig_TimeFmt();
+            return;
+          }
+          if(f.id==="applang"){
+            openBetaConfig_AppLang();
+            return;
+          }
+          if(f.id==="modesplit"){
+            openBetaConfig_ModeSplit();
+            return;
+          }
+        });
+
+        row.appendChild(right);
+        featureListEl.appendChild(row);
+      });
+    }
+
+    function openBetaConfigModal(title, bodyHtml){
+      betaConfigTitle.innerHTML = `<span class="pill">${escapeHtml(title)}</span>`;
+      betaConfigBody.innerHTML = bodyHtml;
+      betaConfigActions.innerHTML = "";
+      betaConfigBackdrop.style.display = "flex";
+    }
+    function closeBetaConfigModal(){ betaConfigBackdrop.style.display = "none"; }
+    closeBetaConfig.addEventListener("click", closeBetaConfigModal);
+    betaConfigBackdrop.addEventListener("click", (e)=>{ if(e.target===betaConfigBackdrop) closeBetaConfigModal(); });
+
+    function addConfigButtons({canRun, onCancel, onRun}){
+      betaConfigActions.innerHTML = "";
+      const cancel = document.createElement("button");
+      cancel.type="button";
+      cancel.className="btn ghost";
+      cancel.textContent="취소";
+      cancel.addEventListener("click", onCancel);
+      betaConfigActions.appendChild(cancel);
+
+      if(canRun){
+        const run = document.createElement("button");
+        run.type="button";
+        run.className="btn";
+        run.textContent="설정 및 실행";
+        run.addEventListener("click", onRun);
+        betaConfigActions.appendChild(run);
+      }
+    }
+
+    async function afterBetaFeatureRun(name){
+      await appAlert(`${name} 기능이 성공적으로 실행되었습니다!`, "완료");
+      const more = await appChoice(
+        "Beta버전의 다른 기능을 추가 설정하시겠습니까?",
+        "Beta",
+        "",
+        "취소",
+        "확인"
+      );
+      if(more){
+        closeBetaConfigModal();
+        renderFeatureList();
+        betaBackdrop.style.display="flex";
+      }else{
+        closeBetaConfigModal();
+        betaBackdrop.style.display="none";
+      }
+    }
+
+    function openBetaConfig_TimeFmt(){
+      const curMode = getTimeFmtMode();
+      const curLang = getTimeFmtLang();
+      openBetaConfigModal("앱 24H/12H 형식전환", `
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="muted">사용환경 설정</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div class="chkRow" id="tf24"><span class="dot" id="dotTf24"></span><div class="chkLabel">24시간제</div></div>
+            <div class="chkRow" id="tf12"><span class="dot" id="dotTf12"></span><div class="chkLabel">12시간제</div></div>
+          </div>
+
+          <div class="muted" style="margin-top:4px;">구분 언어 설정</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div class="chkRow" id="tflKo"><span class="dot" id="dotTfKo"></span><div class="chkLabel">한국어(오전/오후)</div></div>
+            <div class="chkRow" id="tflEn"><span class="dot" id="dotTfEn"></span><div class="chkLabel">영어(AM/PM)</div></div>
+          </div>
+        </div>
+      `);
+
+      const tf24 = document.getElementById("tf24");
+      const tf12 = document.getElementById("tf12");
+      const tflKo = document.getElementById("tflKo");
+      const tflEn = document.getElementById("tflEn");
+      const dotTf24 = document.getElementById("dotTf24");
+      const dotTf12 = document.getElementById("dotTf12");
+      const dotTfKo = document.getElementById("dotTfKo");
+      const dotTfEn = document.getElementById("dotTfEn");
+
+      let selMode = curMode || null;
+      let selLang = curLang || null;
+
+      function render(){
+        dotTf24.className = "dot" + (selMode==="24" ? " fill blue" : "");
+        dotTf12.className = "dot" + (selMode==="12" ? " fill blue" : "");
+        dotTfKo.className = "dot" + (selLang==="ko" ? " fill blue" : "");
+        dotTfEn.className = "dot" + (selLang==="en" ? " fill blue" : "");
+        addConfigButtons({
+          canRun: !!selMode && !!selLang,
+          onCancel: ()=>closeBetaConfigModal(),
+          onRun: async ()=>{
+            setTimeFmt(true, selMode, selLang);
+            applyTimeFormatEverywhere();
+            renderFeatureList();
+            await afterBetaFeatureRun("앱 24H/12H 형식전환");
+          }
+        });
+      }
+
+      tf24.addEventListener("click", ()=>{ selMode="24"; render(); });
+      tf12.addEventListener("click", ()=>{ selMode="12"; render(); });
+      tflKo.addEventListener("click", ()=>{ selLang="ko"; render(); });
+      tflEn.addEventListener("click", ()=>{ selLang="en"; render(); });
+
+      // if not fully set, show only cancel
+      render();
+    }
+
+    function openBetaConfig_AppLang(){
+      const cur = getAppLang();
+      openBetaConfigModal("앱 언어 설정", `
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="muted">언어 설정</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div class="chkRow" id="langKo"><span class="dot" id="dotLangKo"></span><div class="chkLabel">한국어</div></div>
+            <div class="chkRow" id="langEn"><span class="dot" id="dotLangEn"></span><div class="chkLabel">영어</div></div>
+          </div>
+          <div class="muted">언어 설정은 향후 더 다양한 언어로 도입할 계획이 있습니다.</div>
+        </div>
+      `);
+
+      const langKo = document.getElementById("langKo");
+      const langEn = document.getElementById("langEn");
+      const dotLangKo = document.getElementById("dotLangKo");
+      const dotLangEn = document.getElementById("dotLangEn");
+
+      let sel = cur || null;
+      function render(){
+        dotLangKo.className = "dot" + (sel==="ko" ? " fill blue" : "");
+        dotLangEn.className = "dot" + (sel==="en" ? " fill blue" : "");
+        addConfigButtons({
+          canRun: !!sel,
+          onCancel: ()=>closeBetaConfigModal(),
+          onRun: async ()=>{
+            setAppLang(sel);
+            applyLanguageUI();
+            renderFeatureList();
+            await afterBetaFeatureRun("앱 언어 설정");
+          }
+        });
+      }
+      langKo.addEventListener("click", ()=>{ sel="ko"; render(); });
+      langEn.addEventListener("click", ()=>{ sel="en"; render(); });
+      render();
+    }
+
+    function openBetaConfig_ModeSplit(){
+      const cur = getModeValue();
+      openBetaConfigModal("PC/모바일 모드 나누기", `
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="muted">설정 모드</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div class="chkRow" id="modePc"><span class="dot" id="dotModePc"></span><div class="chkLabel">PC 모드</div></div>
+            <div class="chkRow" id="modeMo"><span class="dot" id="dotModeMo"></span><div class="chkLabel">모바일 모드</div></div>
+          </div>
+          <div class="muted">PC와 모바일에 공통이나 따로 제공되는 기능은 예고 없이 변경될 수 있습니다.</div>
+        </div>
+      `);
+
+      const modePc = document.getElementById("modePc");
+      const modeMo = document.getElementById("modeMo");
+      const dotModePc = document.getElementById("dotModePc");
+      const dotModeMo = document.getElementById("dotModeMo");
+
+      let sel = cur || null;
+      function render(){
+        dotModePc.className = "dot" + (sel==="pc" ? " fill blue" : "");
+        dotModeMo.className = "dot" + (sel==="mobile" ? " fill blue" : "");
+        addConfigButtons({
+          canRun: !!sel,
+          onCancel: ()=>closeBetaConfigModal(),
+          onRun: async ()=>{
+            localStorage.setItem(K.mode_value, sel);
+            localStorage.setItem(K.mode_enabled, "1");
+            applyModeClass();
+            renderFeatureList();
+            await afterBetaFeatureRun("PC/모바일 모드 나누기");
+          }
+        });
+      }
+      modePc.addEventListener("click", ()=>{ sel="pc"; render(); });
+      modeMo.addEventListener("click", ()=>{ sel="mobile"; render(); });
+      render();
+    }
+
+    /***********************
+     * Language UI (minimal, but real)
+     ************************/
+    const I18N = {
+      ko: {
+        brand: "파스텔톤 주간 플래너",
+        hint: "Ctrl+Enter 저장 · 방향키 이동 · 조이스틱 실행 가능",
+        notice: "공지",
+        dateLink: "날짜 연동",
+        pickWeek: "주 선택",
+        autoBackup: "자동 백업",
+        manualSave: "수동 저장",
+        backupList: "백업 리스트",
+        betaFeatures: "Beta 추가기능",
+        print: "인쇄",
+        download: "다운로드",
+        export: "내보내기",
+        import: "가져오기",
+        resetSize: "크기 초기화",
+        resetAll: "전체 초기화",
+        joyRun: "조이스틱 실행",
+        edit: "편집"
+      },
+      en: {
+        brand: "Pasteltone Weekly Planner",
+        hint: "Ctrl+Enter to save · Arrow keys move · Joystick available",
+        notice: "Notice",
+        dateLink: "Date Link",
+        pickWeek: "Pick Week",
+        autoBackup: "Auto Backup",
+        manualSave: "Manual Save",
+        backupList: "Backups",
+        betaFeatures: "Beta Features",
+        print: "Print",
+        download: "Download",
+        export: "Export",
+        import: "Import",
+        resetSize: "Reset Size",
+        resetAll: "Reset All",
+        joyRun: "Run Joystick",
+        edit: "Edit"
+      }
+    };
+
+    function applyLanguageUI(){
+      const lang = getAppLang();
+      const t = I18N[lang] || I18N.ko;
+      document.getElementById("brandText").textContent = t.brand;
+      document.getElementById("hintText").textContent = t.hint;
+      noticeBtn.textContent = t.notice;
+      document.getElementById("dateSwitchText").textContent = t.dateLink;
+      pickWeekBtn.textContent = t.pickWeek;
+      document.getElementById("backupSwitchText").textContent = t.autoBackup;
+      manualSaveBtn.textContent = t.manualSave;
+      backupListBtn.textContent = t.backupList;
+      betaFeaturesBtn.textContent = t.betaFeatures;
+      printBtn.textContent = t.print;
+      downloadBtn.textContent = t.download;
+      exportBtn.textContent = t.export;
+      importBtn.textContent = t.import;
+      resetSizeBtn.textContent = t.resetSize;
+      resetAllBtn.textContent = t.resetAll;
+      joyRunBtn.textContent = t.joyRun;
+      document.getElementById("editPill").textContent = t.edit;
+
+      // Update placeholders minimal
+      dlTitle.placeholder = (lang==="en") ? "File title" : "파일 제목";
+      dlExt.placeholder = ".xxx";
+      titleInput.placeholder = (lang==="en") ? "e.g., Weekly Planner" : "예) 주간 플래너 / 나만의 플래너 ...";
+    }
+
+    /***********************
+     * Apply time format everywhere
+     ************************/
+    function applyTimeFormatEverywhere(){
+      renderGrid();
+      loadAllCells();
+      applyTitleToUI();
+      // refresh cell label if open
+      if(cellBackdrop.style.display==="flex" && editingCell.r!=null){
+        const r = editingCell.r, c = editingCell.c;
+        const timeText = formatTimeForApp(baseTimes[r]).text;
+        cellLabel.textContent = `${timeText} · ${days[c]}`;
+      }
+      renderBackupList();
+    }
+
+    /***********************
+     * Download flow
+     ************************/
+    function readDLSettings(){
+      try{ return JSON.parse(localStorage.getItem(K.dl_settings) || "{}"); }
+      catch{ return {}; }
+    }
+    function writeDLSettings(obj){
+      localStorage.setItem(K.dl_settings, JSON.stringify(obj || {}));
+    }
+    function readProgSettings(){
+      try{ return JSON.parse(localStorage.getItem(K.prog_settings) || "{}"); }
+      catch{ return {}; }
+    }
+    function writeProgSettings(obj){
+      localStorage.setItem(K.prog_settings, JSON.stringify(obj || {}));
+    }
+
+    function openDownloadSettings(){
+      // restore previous
+      const s = readDLSettings();
+      dlTitle.value = s.title || "";
+      dlProgramToggle.checked = !!s.program;
+      setSwitchVisual(dlProgramSwitch, dlProgramToggle.checked);
+
+      if(dlProgramToggle.checked){
+        dlExt.value = ".";
+        dlExt.disabled = true;
+        dlExt.style.opacity = ".6";
+      }else{
+        dlExt.disabled = false;
+        dlExt.style.opacity = "1";
+        dlExt.value = s.ext || ".html";
+      }
+
+      updateDLNextEnabled();
+      dlBackdrop.style.display = "flex";
+      setTimeout(()=>dlTitle.focus(), 50);
+    }
+    function closeDownloadSettings(){
+      dlBackdrop.style.display = "none";
+    }
+
+    function updateDLNextEnabled(){
+      const titleOk = (dlTitle.value || "").trim().length > 0;
+      const prog = !!dlProgramToggle.checked;
+      const extOk = prog ? true : ((dlExt.value || "").trim().length > 1);
+      dlNextBtn.classList.toggle("disabled", !(titleOk && extOk));
+    }
+
+    dlTitle.addEventListener("input", updateDLNextEnabled);
+    dlExt.addEventListener("input", updateDLNextEnabled);
+
+    dlProgramSwitch.addEventListener("click", ()=>{
+      const next = !dlProgramToggle.checked;
+      dlProgramToggle.checked = next;
+      setSwitchVisual(dlProgramSwitch, next);
+      if(next){
+        dlExt.value = ".";
+        dlExt.disabled = true;
+        dlExt.style.opacity = ".6";
+      }else{
+        dlExt.disabled = false;
+        dlExt.style.opacity = "1";
+        dlExt.value = ".html";
+      }
+      updateDLNextEnabled();
+    });
+
+    async function downloadBlob(blob, filename){
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    }
+
+    function currentIndexHtmlText(){
+      // generate a clean HTML for download: current document outerHTML
+      // (keeps user data in localStorage, not embedded; fine for app distribution)
+      return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+    }
+
+    async function fetchFileAsBlob(path){
+      const res = await fetch(path, {cache:"no-store"});
+      if(!res.ok) throw new Error("fetch failed");
+      return await res.blob();
+    }
+
+    // Minimal ZIP writer (store method) with CRC32
+    const CRC32_TABLE = (() => {
+      const table = new Uint32Array(256);
+      for (let i=0;i<256;i++){
+        let c = i;
+        for (let k=0;k<8;k++){
+          c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        }
+        table[i] = c >>> 0;
+      }
+      return table;
+    })();
+
+    function crc32(buf){
+      let c = 0xFFFFFFFF;
+      for (let i=0;i<buf.length;i++){
+        c = CRC32_TABLE[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+      }
+      return (c ^ 0xFFFFFFFF) >>> 0;
+    }
+
+    function u16(n){ return [n & 255, (n>>>8) & 255]; }
+    function u32(n){ return [n & 255, (n>>>8)&255, (n>>>16)&255, (n>>>24)&255]; }
+
+    function encodeUtf8(str){
+      return new TextEncoder().encode(str);
+    }
+
+    function buildZip(files){
+      // files: [{name, data(Uint8Array)}]
+      const localParts = [];
+      const centralParts = [];
+      let offset = 0;
+
+      for(const f of files){
+        const nameBytes = encodeUtf8(f.name);
+        const data = f.data;
+        const crc = crc32(data);
+        const compSize = data.length;
+        const uncompSize = data.length;
+
+        // Local file header
+        const localHeader = [
+          ...u32(0x04034b50),
+          ...u16(20), // version needed
+          ...u16(0),  // flags
+          ...u16(0),  // method 0 store
+          ...u16(0),  // time
+          ...u16(0),  // date
+          ...u32(crc),
+          ...u32(compSize),
+          ...u32(uncompSize),
+          ...u16(nameBytes.length),
+          ...u16(0) // extra
+        ];
+        localParts.push(new Uint8Array(localHeader));
+        localParts.push(nameBytes);
+        localParts.push(data);
+
+        // Central directory header
+        const centralHeader = [
+          ...u32(0x02014b50),
+          ...u16(20), // made by
+          ...u16(20), // needed
+          ...u16(0),
+          ...u16(0),
+          ...u16(0),
+          ...u16(0),
+          ...u32(crc),
+          ...u32(compSize),
+          ...u32(uncompSize),
+          ...u16(nameBytes.length),
+          ...u16(0), // extra
+          ...u16(0), // comment
+          ...u16(0), // disk
+          ...u16(0), // int attr
+          ...u32(0), // ext attr
+          ...u32(offset)
+        ];
+        centralParts.push(new Uint8Array(centralHeader));
+        centralParts.push(nameBytes);
+
+        offset += localHeader.length + nameBytes.length + data.length;
+      }
+
+      const centralOffset = offset;
+      const centralSize = centralParts.reduce((sum, p)=>sum + p.length, 0);
+      offset += centralSize;
+
+      const end = [
+        ...u32(0x06054b50),
+        ...u16(0),
+        ...u16(0),
+        ...u16(files.length),
+        ...u16(files.length),
+        ...u32(centralSize),
+        ...u32(centralOffset),
+        ...u16(0)
+      ];
+
+      const all = [...localParts, ...centralParts, new Uint8Array(end)];
+      return new Blob(all, {type:"application/zip"});
+    }
+
+    // Program download selection state
+    let progSel = { html:true, ico:false, png:false, multiMode:"zip" }; // multiMode: zip|separate
+
+    function syncProgDots(){
+      dotHtml.className = "dot" + (progSel.html ? " fill blue" : "");
+      dotIco.className  = "dot" + (progSel.ico  ? " fill blue" : "");
+      dotPng.className  = "dot" + (progSel.png  ? " fill blue" : "");
+
+      const count = [progSel.html, progSel.ico, progSel.png].filter(Boolean).length;
+      if(count >= 2){
+        multiOptionWrap.style.display = "block";
+        dotZip.className = "dot" + (progSel.multiMode==="zip" ? " fill blue" : "");
+        dotSeparate.className = "dot" + (progSel.multiMode==="separate" ? " fill blue" : "");
+      }else{
+        multiOptionWrap.style.display = "none";
+      }
+
+      progDownloadBtn.classList.toggle("disabled", count===0);
+    }
+
+    function openProgramPopup(preset){
+      const saved = readProgSettings();
+      // apply saved default first, then override with preset if provided
+      progSel = {
+        html: true,
+        ico: !!saved.ico,
+        png: !!saved.png,
+        multiMode: saved.multiMode || "zip"
+      };
+      if(preset){
+        if(typeof preset.ico === "boolean") progSel.ico = preset.ico;
+        if(typeof preset.png === "boolean") progSel.png = preset.png;
+      }
+      // html always default checked; allow uncheck? We'll keep it toggleable but auto-checked on open
+      progSel.html = true;
+
+      syncProgDots();
+      progBackdrop.style.display = "flex";
+    }
+    function closeProgramPopup(){ progBackdrop.style.display = "none"; }
+
+    progBackdrop.addEventListener("click", (e)=>{ if(e.target===progBackdrop) closeProgramPopup(); });
+    closeProg.addEventListener("click", closeProgramPopup);
+    progCancelBtn.addEventListener("click", closeProgramPopup);
+
+    progBackdrop.querySelectorAll(".chkRow[data-prog]").forEach(row=>{
+      row.addEventListener("click", ()=>{
+        const k = row.dataset.prog;
+        progSel[k] = !progSel[k];
+        // keep html checked by default, but allow if user wants 0? We'll allow off; but enforce at least one overall.
+        syncProgDots();
+      });
+    });
+
+    optZip.addEventListener("click", ()=>{ progSel.multiMode = "zip"; syncProgDots(); });
+    optSeparate.addEventListener("click", ()=>{ progSel.multiMode = "separate"; syncProgDots(); });
+
+    progDownloadBtn.addEventListener("click", async ()=>{
+      const count = [progSel.html, progSel.ico, progSel.png].filter(Boolean).length;
+      if(count===0) return;
+
+      // remember settings for next time
+      writeProgSettings({ ico: progSel.ico, png: progSel.png, multiMode: progSel.multiMode });
+
+      const title = (dlTitle.value || "").trim() || "pasteltone_weekly_planner";
+      const tasks = [];
+
+      // prepare file blobs
+      let htmlBlob = null;
+      let icoBlob = null;
+      let pngBlob = null;
+
+      try{
+        if(progSel.html){
+          htmlBlob = new Blob([currentIndexHtmlText()], {type:"text/html;charset=utf-8"});
+          tasks.push({name:"index.html", blob: htmlBlob});
+        }
+        if(progSel.ico){
+          icoBlob = await fetchFileAsBlob("./PWP7_favicon_ultra.ico");
+          tasks.push({name:"PWP7_favicon_ultra.ico", blob: icoBlob});
+        }
+        if(progSel.png){
+          pngBlob = await fetchFileAsBlob("./PWP7_favicon_ultra.png");
+          tasks.push({name:"PWP7_favicon_ultra.png", blob: pngBlob});
+        }
+      }catch{
+        await appAlert("파일을 준비하는 중 오류가 발생했습니다.\n(파비콘 파일 경로가 맞는지 확인해줘!)", "오류");
+        return;
+      }
+
+      if(tasks.length === 1){
+        await downloadBlob(tasks[0].blob, `${title}_${tasks[0].name}`);
+        closeProgramPopup();
+        closeDownloadSettings();
+        return;
+      }
+
+      if(progSel.multiMode === "separate"){
+        for(const t of tasks){
+          await downloadBlob(t.blob, `${title}_${t.name}`);
+        }
+        closeProgramPopup();
+        closeDownloadSettings();
+        return;
+      }
+
+      // zip
+      try{
+        const fileEntries = [];
+        for(const t of tasks){
+          const arr = new Uint8Array(await t.blob.arrayBuffer());
+          fileEntries.push({name: t.name, data: arr});
+        }
+        const zipBlob = buildZip(fileEntries);
+        await downloadBlob(zipBlob, `${title}_program.zip`);
+        closeProgramPopup();
+        closeDownloadSettings();
+      }catch{
+        await appAlert("ZIP 생성 중 오류가 발생했습니다.", "오류");
+      }
+    });
+
+    /***********************
+     * Export / Import
+     ************************/
+    async function doExport(){
+      const payload = {
+        app:"pasteltone-weekly-planner",
+        version: 99,
+        exportedAt: new Date().toISOString(),
+        settings: collectSettings(),
+        data: getData()
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+      const d = new Date();
+      const fn = `weekly_planner_export_${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}.json`;
+      await downloadBlob(blob, fn);
+    }
+
+    async function doImportFromFile(file){
+      try{
+        const text = await file.text();
+        const json = JSON.parse(text);
+        if(!json || typeof json !== "object" || !json.data){
+          await appAlert("형식이 올바르지 않은 JSON입니다.", "오류");
+          return;
+        }
+        const ok = await appConfirm("정말 가져오시겠습니까?\n현재 내용은 덮어쓰기 됩니다.", "가져오기");
+        if(!ok) return;
+
+        setData(json.data);
+        if(json.settings) applySettings(json.settings);
+
+        initFromStorage(true);
+        await appAlert("가져오기 완료!", "완료");
+      }catch{
+        await appAlert("가져오기 실패! 파일이 손상됐거나 JSON이 아닙니다.", "오류");
+      }
+    }
+
+    /***********************
+     * Init helpers
+     ************************/
+    function initTheme(){
+      const saved = localStorage.getItem(K.theme) || "lblue";
+      themeSelect.value = saved;
+      applyTheme(saved);
+    }
+    function initOrientation(){
+      const saved = localStorage.getItem(K.ori) || "portrait";
+      orientationSelect.value = saved;
+      applyOrientation(saved);
+    }
+    function initDate(){
+      const enabled = (localStorage.getItem(K.dateOn) || "0") === "1";
+      enableDateLink(enabled, false);
+      setSwitchVisual(dateSwitch, enabled);
+    }
+    function initBackup(){
+      const enabled = isBackupOn();
+      setBackupEnabled(enabled);
+    }
+    function initBeta(){
+      const on = isBetaOn();
+      betaToggle.checked = on;
+      setSwitchVisual(betaSwitch, on);
+      setBetaOn(on);
+      applyModeClass();
+      applyLanguageUI();
+      applyTimeFormatEverywhere();
+    }
+
+    function initFromStorage(full=false){
+      initTheme();
+      initOrientation();
+      applyTitleToUI();
+      initDate();
+      initBackup();
+      initBeta();
+
+      // update grid + cells
+      renderGrid();
+      loadAllCells();
+
+      // restore selection default
+      if(full){
+        selectCell(0,0,false);
+      } else {
+        ensureSelection();
+      }
+    }
+
+    /***********************
+     * Event wiring
+     ************************/
+    // Theme
+    themeSelect.addEventListener("change", ()=>{
+      applyTheme(themeSelect.value);
+    });
+
+    // Date link toggle
+    dateSwitch.addEventListener("click", ()=>{
+      const next = !dateLinkToggle.checked;
+      enableDateLink(next, next===true); // on enable, force pick each time
+    });
+    pickWeekBtn.addEventListener("click", ()=>{
+      enableDateLink(true, true);
+    });
+
+    // Calendar controls
+    calPrev.addEventListener("click", ()=>{
+      calMonth--;
+      if(calMonth<1){ calMonth=12; calYear--; }
+      renderCalendar(calYear, calMonth);
+    });
+    calNext.addEventListener("click", ()=>{
+      calMonth++;
+      if(calMonth>12){ calMonth=1; calYear++; }
+      renderCalendar(calYear, calMonth);
+    });
+    calToday.addEventListener("click", ()=>{
+      const now = new Date();
+      calYear = now.getFullYear();
+      calMonth = now.getMonth()+1;
+      renderCalendar(calYear, calMonth);
+    });
+    calThisWeek.addEventListener("click", ()=>{
+      autoSelectThisWeek();
+      renderCalendar(calYear, calMonth);
+    });
+
+    applyCal.addEventListener("click", ()=>{
+      if(!selectedMonday){
+        appAlert("주를 선택해줘!", "안내");
+        return;
+      }
+      const monday = previewMonday ? previewMonday : getMondayFromDate(selectedMonday);
+      const w = monthWeekNoFromMonday(calYear, calMonth, monday);
+
+      localStorage.setItem(K.mw, `${calYear}-${pad2(calMonth)}-W${w}`);
+      applyWeekMonday(monday);
+
+      const storedTitle = (localStorage.getItem(K.title) || "").trim();
+      const titleAuto = localStorage.getItem(K.titleAuto) === "1";
+      const userHasCustomTitle = storedTitle.length > 0 && !titleAuto;
+
+      if(!userHasCustomTitle){
+        const start = new Date(monday);
+        const end = new Date(monday); end.setDate(monday.getDate()+6);
+        const auto = `${calMonth}월 ${w}주 플래너(${fmtKoreanDate(start)} ~ ${fmtKoreanDate(end)})`;
+        setTitle(auto, true);
+      }
+
+      closeCalModal(false);
+    });
+
+    closeCal.addEventListener("click", ()=>closeCalModal(true));
+    cancelCal.addEventListener("click", ()=>closeCalModal(true));
+    calBackdrop.addEventListener("click", (e)=>{ if(e.target===calBackdrop) closeCalModal(true); });
+
+    // Orientation
+    orientationSelect.addEventListener("change", ()=>applyOrientation(orientationSelect.value));
+
+    // Print
+    printBtn.addEventListener("click", async ()=>{
+      const ok = await maybeShowPrintDialog();
+      if(!ok) return;
+      window.print();
+    });
+
+    // Notice
+    function openNotice(){ noticeBackdrop.style.display="flex"; }
+    function closeNoticeModal(){ noticeBackdrop.style.display="none"; }
+    noticeBtn.addEventListener("click", openNotice);
+    closeNotice.addEventListener("click", closeNoticeModal);
+    okNotice.addEventListener("click", closeNoticeModal);
+    noticeBackdrop.addEventListener("click", (e)=>{ if(e.target===noticeBackdrop) closeNoticeModal(); });
+
+    // Backup toggle
+    backupSwitch.addEventListener("click", ()=>{
+      setBackupEnabled(!backupToggle.checked);
+    });
+
+    // Manual save
+    manualSaveBtn.addEventListener("click", async ()=>{
+      addManualBackup();
+      await appAlert("수동 저장이 완료되었습니다.", "완료");
+    });
+
+    // Backup list
+    backupListBtn.addEventListener("click", ()=>openBackupModal());
+    closeBackup.addEventListener("click", closeBackupModal);
+    backupCloseBtn.addEventListener("click", closeBackupModal);
+    backupBackdrop.addEventListener("click", (e)=>{ if(e.target===backupBackdrop) closeBackupModal(); });
+    backupPurgeBtn.addEventListener("click", ()=>{
+      cleanupBackups();
+      renderBackupList();
+    });
+
+    // Beta switch + info
+    betaSwitch.addEventListener("click", ()=>{
+      const next = !betaToggle.checked;
+      betaToggle.checked = next;
+      setSwitchVisual(betaSwitch, next);
+      setBetaOn(next);
+      if(!next){
+        // turning off beta: stop beta features (revert)
+        setTimeFmt(false, "24", "ko");
+        setAppLang("ko");
+        localStorage.setItem(K.mode_enabled, "0");
+        localStorage.setItem(K.mode_value, "pc");
+        localStorage.setItem(K.shortcuts_enabled, "0");
+        applyModeClass();
+      }
+      applyLanguageUI();
+      applyTimeFormatEverywhere();
+      renderFeatureList();
+    });
+
+    betaInfoBtn.addEventListener("click", ()=>{
+      appAlert(
+        "Beta버전에서는 아직 도입되지 않은 시험 기능을 사용하실 수 있습니다.\n다만 불안정할 수 있으며, 언제든지 스위치를 꺼서 정식 버전으로 돌아가실 수 있습니다.",
+        "Beta 안내"
+      );
+    });
+
+    betaFeaturesBtn.addEventListener("click", ()=>openBetaFeatures());
+
+    closeBeta.addEventListener("click", closeBetaModal);
+    betaCloseBtn.addEventListener("click", closeBetaModal);
+    betaBackdrop.addEventListener("click", (e)=>{ if(e.target===betaBackdrop) closeBetaModal(); });
+
+    // Beta config modal close
+    // already wired
+
+    // Joystick run/close/deselect
+    joyRunBtn.addEventListener("click", ()=>{
+      joyOverlay.style.display = "block";
+      ensureSelection();
+    });
+    joyCloseBtn.addEventListener("click", ()=>{ joyOverlay.style.display = "none"; });
+    joyDeselectBtn.addEventListener("click", ()=>{ deselectCell(); });
+
+    joyOverlay.addEventListener("click", (e)=>{
+      const btn = e.target.closest(".joyBtn");
+      if(!btn) return;
+      ensureSelection();
+      const dir = btn.dataset.dir;
+      if(dir==="up") selectCell(selectedRC.r-1, selectedRC.c);
+      if(dir==="down") selectCell(selectedRC.r+1, selectedRC.c);
+      if(dir==="left") selectCell(selectedRC.r, selectedRC.c-1);
+      if(dir==="right") selectCell(selectedRC.r, selectedRC.c+1);
+      if(dir==="enter") openCellModal(selectedRC.r, selectedRC.c);
+    });
+
+    // Cell modal
+    closeCell.addEventListener("click", closeCellModal);
+    cellBackdrop.addEventListener("click", (e)=>{ if(e.target===cellBackdrop) closeCellModal(); });
+    saveCellBtn.addEventListener("click", ()=>{
+      const {r,c} = editingCell;
+      if(r==null || c==null) return;
+      saveCellValue(r, c, cellInput.value);
+      closeCellModal();
+    });
+    clearCellBtn.addEventListener("click", ()=>{
+      const {r,c} = editingCell;
+      if(r==null || c==null) return;
+      saveCellValue(r, c, "");
+      closeCellModal();
+    });
+    cellInput.addEventListener("keydown", (e)=>{
+      if((e.ctrlKey || e.metaKey) && e.key === "Enter"){
+        e.preventDefault();
+        saveCellBtn.click();
+      }
+    });
+
+    // Title modal
+    function openTitleModal(){
+      titleInput.value = (localStorage.getItem(K.title) || "").trim();
+      titleBackdrop.style.display="flex";
+      setTimeout(()=>titleInput.focus(), 50);
+    }
+    function closeTitleModal(){ titleBackdrop.style.display="none"; }
+    titleBox.addEventListener("click", openTitleModal);
+    closeTitle.addEventListener("click", closeTitleModal);
+    titleBackdrop.addEventListener("click", (e)=>{ if(e.target===titleBackdrop) closeTitleModal(); });
+    saveTitleBtn.addEventListener("click", ()=>{
+      setTitle(titleInput.value, false);
+      closeTitleModal();
+    });
+    clearTitleBtn.addEventListener("click", async ()=>{
+      const ok = await appConfirm("제목을 기본값(주간 플래너)로 돌릴까요?", "제목");
+      if(!ok) return;
+      clearTitle();
+      closeTitleModal();
+    });
+
+    // Table interactions: cell click + expander
+    rowsEl.addEventListener("click", (e)=>{
+      const td = e.target.closest("td.cell");
+      if(!td) return;
+
+      // expander
+      const ex = e.target.closest(".expander");
+      if(ex && td.classList.contains("hasMore")){
+        td.classList.toggle("expanded");
+        updateCellDisplay(td, td.dataset.full || "");
+        return;
+      }
+
+      const r = Number(td.dataset.r), c = Number(td.dataset.c);
+      selectCell(r, c, false);
+      openCellModal(r, c);
+    });
+
+    // PC hover tooltip
+    rowsEl.addEventListener("mousemove", (e)=>{
+      // Only show on devices that likely have hover
+      if(matchMedia("(pointer: coarse)").matches) return;
+      const td = e.target.closest("td.cell");
+      if(!td) return;
+      const full = td.dataset.full || "";
+      if(!full.trim()) return;
+      if(td.classList.contains("hasMore") || full.length > 30){
+        showTooltipForCell(td, e.clientX, e.clientY);
+      }
+    });
+    rowsEl.addEventListener("mouseleave", ()=> hideTooltip());
+    document.addEventListener("scroll", ()=> hideTooltip(), {passive:true});
+    window.addEventListener("resize", ()=> hideTooltip());
+
+    // Selection clear when clicking outside table
+    document.addEventListener("pointerdown", (e)=>{
+      const inTable = e.target.closest("#plannerTable");
+      const inJoy = e.target.closest("#joyOverlay");
+      const inModal = e.target.closest(".backdrop");
+      if(!inTable && !inJoy && !inModal){
+        deselectCell();
+      }
+    });
+
+    // Keyboard nav (Excel-like)
+    document.addEventListener("keydown", (e)=>{
+      const tag = (document.activeElement?.tagName || "").toLowerCase();
+      if(tag === "textarea" || tag === "input") return;
+
+      if(e.key.startsWith("Arrow")){
+        ensureSelection();
+      }
+
+      if(e.key === "ArrowUp"){ e.preventDefault(); selectCell(selectedRC.r-1, selectedRC.c); }
+      else if(e.key === "ArrowDown"){ e.preventDefault(); selectCell(selectedRC.r+1, selectedRC.c); }
+      else if(e.key === "ArrowLeft"){ e.preventDefault(); selectCell(selectedRC.r, selectedRC.c-1); }
+      else if(e.key === "ArrowRight"){ e.preventDefault(); selectCell(selectedRC.r, selectedRC.c+1); }
+      else if(e.key === "Enter"){
+        if(!hasSelection) return;
+        e.preventDefault();
+        openCellModal(selectedRC.r, selectedRC.c);
+      }
+      else if(e.key === " "){
+        if(!hasSelection) return;
+        const td = document.querySelector(`td.cell[data-r="${selectedRC.r}"][data-c="${selectedRC.c}"]`);
+        if(td && td.classList.contains("hasMore")){
+          e.preventDefault();
+          td.classList.toggle("expanded");
+          updateCellDisplay(td, td.dataset.full || "");
+        }
+      }
+      else if(e.key === "Escape"){
+        // ESC deselect (nice on PC)
+        deselectCell();
+      }
+    });
+
+    // Download
+    downloadBtn.addEventListener("click", ()=>openDownloadSettings());
+    closeDL.addEventListener("click", closeDownloadSettings);
+    dlCancelBtn.addEventListener("click", closeDownloadSettings);
+    dlBackdrop.addEventListener("click", (e)=>{ if(e.target===dlBackdrop) closeDownloadSettings(); });
+
+    dlNextBtn.addEventListener("click", async ()=>{
+      if(dlNextBtn.classList.contains("disabled")) return;
+
+      const title = (dlTitle.value || "").trim();
+      const prog = !!dlProgramToggle.checked;
+
+      // remember settings
+      const s = readDLSettings();
+      s.title = title;
+      s.program = prog;
+      if(!prog) s.ext = (dlExt.value || "").trim();
+      writeDLSettings(s);
+
+      if(prog){
+        // program mode: ext input is disabled and shows ".", but we treat it as ".html"
+        // ask about favicons
+        closeDownloadSettings();
+
+        const msg = "파비콘 ico와 png도 다운받으시겠습니까?";
+        const sub = "확인을 누르시면 프로그램 다운 팝업으로 이동됩니다.";
+        const res = await showAppDialog({
+          title:"다운로드",
+          message: escapeHtmlLines(msg),
+          sub,
+          buttons:[
+            {label:"취소", value:false, className:"btn ghost"},
+            {label:"확인", value:true, className:"btn"}
+          ]
+        });
+
+        // move to program popup; html auto checked, favicon preset depends on choice
+        openProgramPopup(res ? {ico:true, png:true} : {ico:false, png:false});
+        return;
+      }
+
+      // normal mode: validate ext
+      const ext = (dlExt.value || "").trim();
+      if(ext.toLowerCase() !== ".html"){
+        await appAlert("아직 .html 아니면 다운 안됨", "다운로드");
+        return;
+      }
+
+      // download html directly
+      const blob = new Blob([currentIndexHtmlText()], {type:"text/html;charset=utf-8"});
+      await downloadBlob(blob, `${title}.html`);
+      closeDownloadSettings();
+    });
+
+    // Export/Import
+    exportBtn.addEventListener("click", async ()=>{
+      const ok = await appConfirm("현재 내용을 JSON으로 내보낼까요?", "내보내기");
+      if(!ok) return;
+      await doExport();
+    });
+
+    importBtn.addEventListener("click", async ()=>{
+      const ok = await appConfirm("JSON 파일을 가져올까요?\n현재 내용이 덮어쓰기될 수 있어요.", "가져오기");
+      if(!ok) return;
+      importFile.value="";
+      importFile.click();
+    });
+
+    importFile.addEventListener("change", async ()=>{
+      const file = importFile.files?.[0];
+      if(!file) return;
+      await doImportFromFile(file);
+    });
+
+    // Reset
+    resetSizeBtn.addEventListener("click", async ()=>{
+      await appAlert("현재 버전은 크기 조절 기능은 다음 단계에서 더 정교하게 넣을 예정이에요!", "안내");
+    });
+
+    resetAllBtn.addEventListener("click", async ()=>{
+      const ok = await appConfirm("⚠️ 전체 초기화하면 입력한 내용/설정이 모두 삭제됩니다.\n정말 초기화할까요?", "전체 초기화");
+      if(!ok) return;
+
+      // Clear known keys
+      Object.values(K).forEach(key=>localStorage.removeItem(key));
+      // Keep device_id? user asked temporary id stored; clearing is fine; but keep? We'll clear too for full reset.
+      localStorage.removeItem(K.device_id);
+
+      await appAlert("전체 초기화가 완료되었습니다.", "완료");
+      initFromStorage(true);
+    });
+
+    // Print dialog close event is handled inside maybeShowPrintDialog
+
+    // Beta config modal close already
+
+    /***********************
+     * Download modals close
+     ************************/
+    // Program popup close already
+
+    /***********************
+     * Minor: prevent context menu on table (helps mobile)
+     ************************/
+    plannerTable.addEventListener("contextmenu", (e)=>e.preventDefault());
+
+    /***********************
+     * Startup
+     ************************/
+    function init(){
+      ensureDeviceId();
+      initFromStorage(true);
+
+      // default buttons visibility
+      const enabled = (localStorage.getItem(K.dateOn) || "0") === "1";
+      pickWeekBtn.style.display = enabled ? "inline-flex" : "none";
+
+      // switches visuals
+      setSwitchVisual(dateSwitch, enabled);
+      setSwitchVisual(backupSwitch, isBackupOn());
+      setSwitchVisual(betaSwitch, isBetaOn());
+      setSwitchVisual(dlProgramSwitch, !!dlProgramToggle.checked);
+    }
+
+    init();
+  </script>
+</body>
+</html>
